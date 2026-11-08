@@ -12,6 +12,12 @@ and reopening; separate Incomplete and Completed tabs; automatic ordinal orderin
 multiple users and reordering are out of scope. The supplied directory layout is preserved in
 [planning-constraints.md](planning-constraints.md).
 
+## Clarifications
+
+### Session 2026-11-08
+
+- Q: If the same ToDo is edited in two browser tabs, how should conflicting saves be handled? → A: Last successful save wins; no conflict warning.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - View and Create ToDos (Priority: P1)
@@ -77,6 +83,9 @@ As the user, I can correct or update the content of an incomplete or completed T
 2. **Given** an edit in progress, **When** the user cancels, **Then** saved content is unchanged.
 3. **Given** invalid content, **When** the user saves, **Then** validation feedback appears,
    entered content remains available for correction, and saved data is unchanged.
+4. **Given** the same non-deleted ToDo is open for editing in two browser tabs, **When** both
+   submit valid content edits successfully, **Then** the last successful save determines the
+   saved title and description, without an outdated-edit rejection or conflict warning.
 
 ---
 
@@ -104,6 +113,8 @@ item and verify its ordinal is 3. Repeat after deleting the highest ordinal and 
 
 - Deleting the highest ordinal or every visible item MUST NOT reset ordinal assignment.
 - Overlapping creation requests MUST receive distinct ordinals without losing either item.
+- Conflicting content edits to a non-deleted ToDo MUST use the last successful save without a
+  conflict warning. A stale edit MUST NOT restore a deleted item or overwrite completion status.
 - Invalid or nonexistent identifiers and already-deleted items MUST produce a clear unavailable
   result without creating, restoring or changing records. Repeated deletion leaves the record deleted.
 - Failed reads MUST show an error distinct from an empty list, with a retry action.
@@ -158,6 +169,10 @@ item and verify its ordinal is 3. Repeat after deleting the highest ordinal and 
 - **FR-015**: Missing, invalid or deleted item references MUST return a clear unavailable or
   invalid-input outcome without modifying data or exposing retained deleted content.
 - **FR-016**: Reordering controls and reordering operations MUST remain outside this feature.
+- **FR-017**: When multiple browser tabs save conflicting content edits to a non-deleted ToDo,
+  the last successful save MUST determine its title and description. The system MUST NOT reject
+  a content edit solely because it was based on older content or display a conflict warning.
+  Content edits MUST preserve current completion status and MUST NOT restore deleted records.
 
 ### Key Entities *(include if feature involves data)*
 
