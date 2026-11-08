@@ -171,3 +171,14 @@ replace the accepted calendar/time semantics or introduce a custom calendar fram
 
 This task-generation command creates only this task list. It does not implement changes or
 modify the currently running application.
+
+
+## Phase 7: Convergence
+
+Assessment of the present implementation against the feature artifacts identified three partial
+plan obligations. Existing task records are preserved. Follow TDD for the regressions below;
+retain the current API, native controls, UTC precision, retained-overdue semantics and pending/error behaviour.
+
+- [ ] T034 Resolve F1 (MEDIUM): Make React Hook Form own the controlled due draft in src/client/components/todo/TodoForm.tsx and integrate date/hour/minute Zod group validation into its resolver, removing the stale parallel RHF dueAt value and separate post-content-validation path; adapt src/client/components/todo/DueDateFields.tsx as needed and add regression assertions in tests/unit/client/form-failures.test.tsx and tests/unit/client/todo-edit.test.tsx for integrated validation, retained/change/clear modes, timezone precision, server errors and focus per plan: US2 "RHF owns the form state" and T022 (partial).
+- [ ] T035 Resolve F2 (MEDIUM): Refresh the clock and timezone-dependent availability when the native date, hour or minute control receives focus in src/client/components/todo/DueDateFields.tsx, preserving selected instants and existing timer/listener cleanup; first add fixed-clock tests in tests/unit/client/due-date-fields.test.tsx that advance system time without firing the timer/window events and verify field focus updates date min, disabled options and expired-selection feedback per plan: US2 field-focus refresh, T023 and FR-005 (partial).
+- [ ] T036 Resolve F3 (LOW): Show accessible, date-associated guidance in src/client/components/todo/DueDateFields.tsx when today has no eligible remaining minutes, inviting the user to choose a future date without selecting or advancing any value; add controlled-clock tests in tests/unit/client/due-date-fields.test.tsx for 23:59 exhaustion, future-date recovery and midnight rollover per plan: US2 end-of-day guidance and FR-005 (partial).
