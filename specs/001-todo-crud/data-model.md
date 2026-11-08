@@ -2,15 +2,15 @@
 
 ## Entity and Validation
 
-There is one Todo entity and no owner/user relationship. Latest planning requirements supersede
-old optional-description and deletion-timestamp assumptions in spec.md.
+There is one Todo entity and no owner/user relationship. The latest revision makes description and dueAt
+optional and retains Boolean soft deletion.
 
 | Field | Prisma type / default | Rules |
 |---|---|---|
 | id | String, UUID primary key, Prisma-generated | Immutable; UUID params validated |
 | title | String, required | Trimmed; 1–120 characters |
-| description | String, required | Trimmed; 1–500 characters |
-| dueAt | DateTime, required | Explicit timezone input; UTC before persistence |
+| description | String?, nullable | Optional; trimmed maximum 500; blank becomes null |
+| dueAt | DateTime?, nullable | Optional; timezone-qualified when provided; UTC persistence |
 | ordinal | Int, unique | Backend assigned; non-negative; immutable |
 | completed | Boolean, false | Dedicated explicit Boolean update |
 | deleted | Boolean, false | Only delete operation can set true |
@@ -18,9 +18,11 @@ old optional-description and deletion-timestamp assumptions in spec.md.
 | updatedAt | DateTime, automatically updated | Server-managed on content/status/delete writes |
 
 SQLite cannot enforce String limits through Prisma schema declarations; shared Zod schemas
-apply limits server-side and in forms. Required description is interpreted as nonblank after
-trimming. Reject null, omitted fields on create, unsupported keys and invalid dates. Past due
-dates are accepted. No completedAt, deletedAt, ownerId or recurrence fields are added.
+apply limits server-side and in forms. Only title is required on create. Omitted or null optional
+fields default to null; blank description normalises to null. PATCH omission leaves a field
+unchanged; explicit null clears it. A blank frontend date control sends null. Reject invalid
+nonblank dates, wrong types and unsupported keys. Past due dates are allowed. No completedAt,
+deletedAt, ownerId or recurrence fields are added. Migration history must use nullable columns.
 
 ## Constraints and Indexes
 

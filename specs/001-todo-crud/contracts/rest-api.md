@@ -21,12 +21,14 @@ Detail reads and all updates exclude deleted. Repeated delete returns 404.
 
 ## Content Requests
 
-POST requires title (trimmed 1–120), description (trimmed 1–500) and dueAt (valid ISO 8601 with Z
-or numeric timezone offset). PATCH accepts any nonempty subset of these fields; title/description
-cannot be blank, dueAt cannot be null. All input objects are strict. Missing required values,
-null values, wrong types and unknown properties are 400, including id, ordinal, createdAt,
-updatedAt, deleted and completed in content requests. A completion body requires exactly
-completed: true or completed: false; strings and omitted values are invalid. No blind toggle.
+POST requires only title (trimmed 1–120). description is optional/nullable, trimmed to at most
+500 characters; blank becomes null. dueAt is optional/nullable; when provided it must be valid
+ISO 8601 with Z or a numeric timezone offset. Omitted optional fields default to null.
+PATCH accepts a nonempty subset of title, description and dueAt. Omission preserves the current
+value; explicit null clears description or dueAt. Title cannot be null or blank. Wrong types,
+invalid nonblank dates and unknown/system-managed properties return 400. Strict allowlists reject
+id, ordinal, createdAt, updatedAt, deleted and completed in content requests. Completion requires
+exactly completed: true or completed: false; strings and omitted values are invalid.
 
 Example create body:
 
@@ -38,7 +40,7 @@ Example create body:
 
 Single-item responses use {"data": Todo}; lists use {"data": [Todo, ...]} without pagination.
 Todo contains id, title, description, dueAt, ordinal, completed, deleted, createdAt and updatedAt.
-Only deleted=false items are returned. System-managed fields are read-only.
+description and dueAt are null when absent. Only deleted=false items are returned. System-managed fields are read-only.
 
 ```json
 {

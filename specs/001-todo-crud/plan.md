@@ -8,13 +8,15 @@
 ## Summary
 
 Build one small React interface and Express API backed by SQLite through Prisma. Use the
-supplied layer directories with ToDo-specific modules inside them. Preserve two completion tabs,
-soft deletion, ascending lifetime ordinals and local date presentation. Implement required title,
-description and due date fields using the revised limits of 120 and 500 characters.
+supplied layer directories with ToDo-specific modules inside them. Show a single task list with
+completed items hidden initially. Place two buttons to the right of the list, in this order:
+"create new task" and "Display completed". Creation replaces the list with a form; successful
+creation or cancellation returns to the list. Title remains required (1–120 characters), while
+description (maximum 500 characters) and dueAt are optional. All field errors appear under
+the corresponding control.
 
-The planning request explicitly replaces earlier optional-description, no-due-date and deletion-
-timestamp defaults; spec.md has been synchronised rather than leaving conflicting requirements.
-The user confirmed that deleted records remain included in the lifetime ordinal maximum.
+This revision explicitly supersedes completion tabs and the required description/dueAt fields.
+Soft deletion, UTC handling and the confirmed lifetime ordinal sequence remain in force.
 
 ## Technical Context
 
@@ -28,7 +30,7 @@ DateTime storage. Never commit live databases, local environment files or test d
 Component tests require an approved DOM environment; no browser automation framework assumed.
 **Target Platform**: Local desktop assessment on a current browser; server bound to loopback.
 **Project Type**: Single repository web application, one backend process, one database.
-**Performance Goals**: With 100 tasks, at least 19/20 trials per list/tab/write action display
+**Performance Goals**: With 100 tasks, at least 19/20 trials per list/filter/write action display
 results within 2 seconds in the agreed local environment (SC-006).
 **Constraints**: No authentication, multi-user support, reordering, restoration, pagination,
 CQRS, event bus, DI framework, microservices or unrelated feature work.
@@ -46,7 +48,7 @@ CQRS, event bus, DI framework, microservices or unrelated feature work.
 | IV. Database | UUID, Migrate, safe queries, unique ordinal, atomic transactions, UTC | Pass |
 | V. API | REST contract, validation, final error middleware, safe errors | Pass |
 | VI. Frontend | Focused components/hooks, RHF + Zod, local state, explicit states | Pass |
-| VII. Accessibility | Accessible tabs/forms, keyboard/focus, errors, manual AA review | Pass |
+| VII. Accessibility | Accessible list controls/forms, keyboard/focus, errors, manual AA review | Pass |
 | VIII. TDD | Red-green-refactor for every behavioural slice; meaningful integration tests | Pass |
 | IX. Security | Strict allowlists, no secrets/errors disclosed, loopback deployment | Pass |
 | X. Dependencies | No installation now; dependency review and approval before installing | Pass |
@@ -108,7 +110,7 @@ src/
 │   ├── app.ts
 │   └── index.ts
 └── client/
-    ├── components/todo/{TodoTabs,TodoList,TodoItem,TodoForm}.tsx
+    ├── components/todo/{TodoListActions,TodoList,TodoItem,TodoForm}.tsx
     ├── pages/TodosPage.tsx
     ├── hooks/useTodos.ts
     ├── services/{http,todo-api}.ts
@@ -173,22 +175,42 @@ bodies or sensitive field values. No async-handler dependency is required in Exp
 Axios instance uses relative /api URLs, finite timeout and AbortController cancellation. API
 service returns typed, schema-validated data; unknown errors are narrowed safely. useTodos owns
 list/loading/error and refresh state. Cancel obsolete reads and use a request-generation guard
-so late responses cannot replace the current tab. Do not introduce global state or query caching.
+so late responses cannot replace the current completion filter. Do not introduce global state
+or query caching. TodosPage holds local view state (list/create/edit) and includeCompleted=false.
 
-Incomplete tab requests the default list. Completed tab requests includeCompleted=true and
-filters completed=true, preserving returned ordinal order. Re-fetch after successful writes;
-keep the current tab selected, and notify when a created item belongs to the other tab. Completion
-controls send an explicit target Boolean and disable duplicate submissions while pending.
-Failed writes preserve form values and saved UI state; network uncertainty prompts refresh
-before a manual retry. No background polling or cross-tab real-time synchronisation is required.
+In list view, TodoListActions sits to the right of the list with "create new task" first and
+"Display completed" second. The first button hides the list and its action group and displays
+TodoForm with Save and Cancel. Successful creation returns to the list, refreshes it and retains
+the completion filter. Cancel returns without saving and discards the draft. Validation or
+request failure keeps the form visible and preserves entered values. Move focus to the title
+on form entry and back to "create new task" on return. An empty list still shows both buttons.
+Editing uses the same form view; save or cancel returns to the list.
 
-TodoForm uses RHF, shared Zod field rules and zodResolver. Render every local or returned field
-error directly below its input with aria-invalid and aria-describedby; focus the first error.
-Use labels, semantic buttons, live operation feedback and keyboard-accessible tablist with
-arrow keys, Home/End and selected panel semantics. After an item disappears, move focus to an
-adjacent item or list heading. Keep a retry action for load failure and a distinct empty state.
+"Display completed" enables includeCompleted=true and displays completed and incomplete tasks
+together in ascending ordinal order, without a second list or completed-only filtering. Use a
+pressed-state button (aria-pressed); a second click restores incomplete-only visibility while
+retaining its label. A reload starts incomplete-only. Retain this filter through create/edit
+save or cancel. Responsive styling may stack controls while preserving order and keyboard flow.
 
-A datetime-local control edits local wall time, then converts to a timezone-qualified UTC ISO
+Re-fetch after successful writes. Completion controls send an explicit target Boolean and
+disable duplicate submissions while pending. A newly completed item disappears only when the
+filter excludes completed items. Failed writes preserve form values and saved UI state; network
+uncertainty prompts refresh before a manual retry. No background polling or cross-tab real-time
+synchronisation is required.
+
+TodoForm uses RHF, shared Zod field rules and zodResolver. Title is required; description and dueAt
+are labelled optional. Omitted, null or blank description normalises to null; omitted/null dueAt
+means no due date. Blank date input sends null. On PATCH, omission preserves the existing value
+and explicit null clears either optional field. Reject invalid nonblank values. The model uses
+String? and DateTime? for these fields; render absent values as "No description" / "No due date".
+
+Render every local or returned field validation error directly below its control, including
+under title, description and due date inputs. Connect error IDs using aria-describedby and set
+aria-invalid; focus the first error. Keep non-field failures in an accessible form summary.
+Use semantic buttons and live feedback. After an item disappears, move focus to an adjacent item
+or list heading. Keep load retry and empty states distinct; no tablist semantics are needed.
+
+When dueAt is provided, a datetime-local control edits local wall time, then converts to a timezone-qualified UTC ISO
 string before submission. Do not append Z to a local input value. Populate edits with local
 components rather than slicing a UTC string. Preserve unchanged dueAt exactly; browser Date
 resolution selects the earlier instant in an overlapping hour. Reject a nonexistent local time
@@ -208,12 +230,14 @@ sidecars, generated Prisma output and test artefacts to .gitignore during implem
 
 1. Dependency review, approved installation, strict build and isolated test harness. Record the
    expected failing baseline before each behavioural slice.
-2. Shared validation and repository migration tests: lengths, due dates, flags, UUID, unique
+2. Shared validation and repository migration tests: required title, optional-field omission/null/
+   clearing, lengths, provided due dates, flags, UUID, unique
    ordinal and rollback; apply committed migrations to each isolated test database.
 3. P1 list/create service and API tests, including concurrent creation and persistence.
-4. P1 explicit completion and visibility tests, followed by accessible list/tab interactions.
+4. P1 explicit completion and visibility tests, followed by accessible list/filter/form interactions.
 5. P2 edit and last-save-wins tests, then soft deletion and stale edit/delete race coverage.
-6. Component forms and error mapping; local-time conversion and daylight-saving edge tests.
+6. Component tests for list → create → save/cancel → list, failure retention, inclusive completion
+   filtering, optional field clearing and errors under each control; local-time conversion and daylight-saving edge tests.
 7. Run all automated tests, strict type checking, lint and production build. Complete the
    keyboard/screen-reader/contrast review and timed 100-item scenarios in quickstart.md.
 

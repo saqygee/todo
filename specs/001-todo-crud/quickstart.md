@@ -76,30 +76,32 @@ ID for subsequent PATCH/detail/delete checks; do not reset an existing database 
 
 ## End-to-End Acceptance Scenarios
 
-1. Open with an empty database: Incomplete is selected, empty message visible and create usable.
-2. Create three items with title, description and due time. Check ascending ordinals and reload
-   persistence; restart the server and confirm the same records remain.
-3. Complete the middle item. It disappears from Incomplete and appears only in Completed.
-   The inclusive request contains both statuses; the UI Completed panel contains completed only.
-   Set completed=false explicitly and check original order returns.
-4. Edit all content fields in both tabs. Cancel once; confirm no save. Save conflicting content
-   from two browser tabs; the last successful save wins and completion status is preserved.
-5. Delete middle, highest and all visible items in separate tests. Verify retained deleted flags
-   through repository tests, disappearance and 404 on detail/edit/status; later ordinals exceed
-   all previously allocated values. Never hard-delete to simulate this acceptance case.
-6. Submit title lengths 0/120/121 and description lengths 0/500/501, including whitespace-only
-   strings. Verify clear errors under each invalid input. Reject missing/invalid/no-timezone
-   dueAt, unknown fields, system-managed fields and string Boolean completion values.
-7. Test same-instant dates with Z and positive/negative offsets. Display in UTC, Europe/London
-   and America/New_York, including date boundaries and DST gaps/overlaps. Reject nonexistent
-   local wall times; preserve unchanged stored instants when editing other fields.
-8. Simulate list/write failures. Check empty/error distinction, retry, retained form values,
-   disabled duplicate submission, no raw stack traces and no automatic replay of uncertain creates.
-9. With keyboard only, create/edit/complete/delete, switch tabs with arrows/Home/End and cancel.
-   Check predictable focus after disappearing items. Review labels, inline errors, status live
-   announcements and contrast with a screen reader and manual WCAG AA review.
-10. Seed 100 mixed tasks in an isolated acceptance database. Time list, tab and successful write
-    visibility for 20 repetitions each; at least 19 per action must complete within 2 seconds.
+1. Open an empty list: both right-side buttons are visible in the requested order. Click
+   "create new task": the list disappears and the form appears. Cancel restores the list without
+   saving. Repeat and create with only title; description and dueAt are null. Success restores
+   the list, showing the new item. Failed validation/submission retains the form and input.
+2. Create three tasks, some with optional fields. Check ordinal order, reload/restart persistence,
+   and "No description" / "No due date" when absent.
+3. Complete one task: it disappears from the default list. Click "Display completed": completed
+   and incomplete tasks appear together in ordinal order. Click again: completed tasks hide.
+   Verify aria-pressed matches the state; reload returns to incomplete-only.
+4. Save or cancel a form while inclusive visibility is enabled: the restored list retains that
+   filter. Edit optional fields and clear them; confirm null persistence. Verify last successful
+   content save wins across browser tabs without changing completion state.
+5. Delete middle, highest and all visible items in separate tests. Check retained deleted flags,
+   404 on detail/edit/status, unchanged surviving ordinals and lifetime ordinal allocation.
+6. Validate title lengths 0/120/121 and description lengths 0/500/501. Blank/omitted optional
+   values succeed; invalid provided dates fail. Each error appears below its matching control,
+   with an accessible description and focus on the first invalid field. Reject system fields.
+7. For provided due dates, check timezone-qualified input, UTC persistence, local display, date
+   boundaries and DST. Missing dueAt must not be formatted as an invalid or epoch date.
+8. Simulate read/write failures: distinct error/empty states, retry, preserved values and no
+   raw errors or automatic replay of uncertain creates. Verify cancellation during loading cannot
+   cause late responses to reopen the form or replace the active visibility filter.
+9. With keyboard and screen reader, operate both buttons, forms and completion/delete controls.
+   Check form-entry/return focus, labels, inline errors, live feedback and colour contrast.
+10. With 100 mixed tasks, time list/filter/write visibility for 20 repetitions each; at least
+    19 per action must complete within 2 seconds.
 
 ## Database and Race Verification
 

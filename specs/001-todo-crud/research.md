@@ -56,16 +56,25 @@ Sources: [Axios error handling](https://github.com/axios/axios/blob/v1.x/docs/pa
 [RHF useForm](https://react-hook-form.com/docs/useform),
 [Vite server proxy](https://vite.dev/config/server-options).
 
-## Request/Display Time and Tab Semantics
+## Single-List Flow and Optional Fields
 
-**Decision**: Persist normalised UTC, return UTC ISO strings and display browser-local dates.
-Keep separate Incomplete/Completed tabs; the latter filters completed records from the inclusive
-server response. Local date editing must preserve unchanged instants and reject nonexistent
-local times. For repeated local hours, use the earlier occurrence resolved by browser Date.
-**Rationale**: This satisfies the previously specified tabs and the newly explicit inclusive
-query without adding another endpoint or timezone preference system.
-**Alternatives considered**: Showing all records in Completed would contradict the tab label;
-appending Z to a local wall time would change the intended instant.
+**Decision**: Use one list, right-side "create new task" and "Display completed" buttons, and
+local list/create/edit view state. The create form replaces the list; successful save or Cancel
+restores it. The visibility button toggles includeCompleted and displays both statuses together.
+**Rationale**: This directly follows the latest user request and avoids multiple list panels.
+**Alternatives considered**: Separate completion tabs were superseded; a completed-only filter
+would fail the inclusive display requirement. No new dependencies or technology research needed.
+
+**Decision**: description and dueAt are nullable optional fields; PATCH omission preserves and
+null clears. Blank form values map to absence; invalid provided values show errors below controls.
+**Rationale**: Users can create with title alone and remove previously entered optional values.
+**Alternatives considered**: Requiring these fields contradicts the latest request; conflating
+PATCH omission and clearing would unexpectedly erase existing data.
+
+**Decision**: Persist provided dates in UTC and display them in browser-local time. Preserve
+unchanged instants; reject nonexistent local wall times; retain the existing overlap policy.
+**Rationale**: Optionality does not alter timezone correctness for dates that are provided.
+**Alternatives considered**: A fabricated default due date misrepresents user input.
 
 ## Dependencies and Installation Gate
 
