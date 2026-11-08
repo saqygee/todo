@@ -156,6 +156,10 @@ updates inside a repository transaction, not a stale read followed by an unrestr
 A missing match maps to 404. Last successful content write wins for title/description/dueAt only.
 Delete sets deleted=true; repeated deletion returns 404. No hard-delete or restore path exists.
 
+The repository enables SQLite WAL mode using a fixed PRAGMA through Prisma before data access.
+The driver uses a zero busy timeout so synchronous lock waits cannot block the Node event loop;
+known conflicts use the bounded asynchronous retry below. This was verified with separate clients.
+
 Create reads the maximum ordinal across all records and inserts max+1 (or 0) in one short
 serializable transaction. Ordinal is unique. Retry the entire rolled-back transaction up to
 three attempts for verified transient SQLite locking/write conflicts and ordinal collisions,

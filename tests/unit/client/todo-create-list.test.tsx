@@ -1,0 +1,32 @@
+import React from 'react';
+import { it, expect, vi } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { TodosPage } from '../../../src/client/pages/TodosPage.js';
+import { todoApi } from '../../../src/client/services/todo-api.js';
+vi.mock('../../../src/client/services/todo-api.js', () => ({ todoApi: { list: vi.fn(async () => []), create: vi.fn(), get: vi.fn(), update: vi.fn(), complete: vi.fn(), remove: vi.fn() } }));
+it('replaces the list with a form, cancels without save, and renders field errors', async () => {
+    render(<TodosPage />);
+    await screen.findByText('Your list is clear.');
+    expect(screen.getAllByRole('button').slice(0, 2).map(b => b.textContent)).toEqual(['create new task', 'Display completed']);
+    fireEvent.click(screen.getByRole('button', { name: 'create new task' }));
+    expect(screen.queryByRole('button', { name: 'Display completed' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Save task' }));
+    await screen.findByText('Enter a title.');
+    expect(screen.getByLabelText('Title').getAttribute('aria-invalid')).toBe('true');
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    await screen.findByText('Your list is clear.');
+    expect(todoApi.create).not.toHaveBeenCalled();
+});
+it('disables save/cancel during submission and restores list on success', async () => {
+    let finish: () => void = () => { };
+    vi.mocked(todoApi.create).mockImplementationOnce(() => new Promise(resolve => { finish = () => resolve({ id: 'f5f24d2f-7a55-4aeb-b101-5b28d2040b82', title: 'New task', description: null, dueAt: null, ordinal: 0, completed: false, deleted: false, createdAt: '2026-11-08T12:00:00Z', updatedAt: '2026-11-08T12:00:00Z' }); }));
+    render(<TodosPage />);
+    await screen.findByText('Your list is clear.');
+    fireEvent.click(screen.getByRole('button', { name: 'create new task' }));
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'New task' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save task' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Cancel' }).hasAttribute('disabled')).toBe(true));
+    expect(todoApi.create).toHaveBeenCalledWith({ title: 'New task', description: null, dueAt: null });
+    finish();
+    await screen.findByRole('button', { name: 'create new task' });
+});

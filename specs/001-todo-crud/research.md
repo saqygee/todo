@@ -110,3 +110,16 @@ after failure with input retained; return to the list after success.
 **Rationale**: Request cancellation cannot guarantee the server did not commit a write.
 **Alternatives considered**: Allowing Cancel during submission would promise an unreliable undo;
 adding mutation rollback or idempotency infrastructure is unnecessary for this assessment.
+
+## Verified Driver Contention Behaviour
+
+Independent-client tests exposed blocking rollback-journal waits with the synchronous SQLite
+driver. Repository initialisation now enables WAL with a fixed Prisma PRAGMA, and the driver
+busy timeout is zero. Asynchronous whole-transaction retries preserve the planned three-attempt
+bound. No mutex, extra process, counter table or new dependency was added. Separate-client
+contention tests pass with distinct lifetime ordinals.
+
+Prisma Migrate on this toolchain required the file to exist before first deploy. prisma.config.ts
+creates missing parent directories and opens/closes the database file in append mode, preserving
+existing bytes; all schema changes remain managed by Prisma Migrate. Fresh-directory deployment
+and repeated deploy/reconnect are covered by integration tests.

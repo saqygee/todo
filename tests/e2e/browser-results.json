@@ -1,0 +1,32 @@
+{
+  "browser": "Google Chrome headless (native CDP)",
+  "primaryButtonContrast": 9.335954792031012,
+  "accessibleButtonNames": true,
+  "keyboardSpaceToggle": true,
+  "flow": "create/cancel/validate/complete/reopen/edit/delete passed",
+  "timing": {
+    "list": {
+      "trials": 20,
+      "under2seconds": 20,
+      "maxMs": 116,
+      "medianMs": 92
+    },
+    "filter": {
+      "trials": 20,
+      "under2seconds": 20,
+      "maxMs": 157,
+      "medianMs": 100
+    },
+    "write": {
+      "trials": 20,
+      "under2seconds": 20,
+      "maxMs": 222,
+      "medianMs": 174
+    }
+  },
+  "mobileOverflow": false,
+  "screenshots": [
+    "/tmp/todo-empty.png",
+    "/tmp/todo-list.png"
+  ]
+}

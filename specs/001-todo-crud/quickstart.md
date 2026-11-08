@@ -1,8 +1,8 @@
 # Quickstart and Validation Guide
 
-This is the intended command contract for implementation. There is currently no package.json,
-source code, migration or test harness; commands below become runnable after those are built.
-Do not treat these commands as already executed or as permission to install packages.
+The application, migration history and test scripts are implemented. Dependency installation
+was approved on 2026-11-08. See validation-results.md for executed checks and remaining manual
+accessibility review; runnable commands follow.
 
 ## Prerequisites
 

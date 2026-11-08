@@ -162,3 +162,19 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Local SQLite and generated application files
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+src/generated/
+build/
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/

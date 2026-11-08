@@ -1,0 +1,13 @@
+import { z } from 'zod';
+import { TITLE_MAX, DESCRIPTION_MAX } from '../constants/todo.js';
+const title = z.string().trim().min(1, 'Enter a title.').max(TITLE_MAX, 'Title must contain at most 120 characters.');
+const description = z.string().trim().max(DESCRIPTION_MAX, 'Description must contain at most 500 characters.').transform(v => v || null).nullable();
+const instant = z.iso.datetime({ offset: true }).refine(v => Number.isFinite(Date.parse(v)), 'Enter a valid date and time.').transform(v => new Date(v).toISOString());
+export const createTodoSchema = z.strictObject({ title, description: description.optional().default(null), dueAt: instant.nullable().optional().default(null) });
+export const updateTodoSchema = z.strictObject({ title: title.optional(), description: description.optional(), dueAt: instant.nullable().optional() }).refine(v => Object.keys(v).length > 0, 'Provide at least one field.');
+export const completionSchema = z.strictObject({ completed: z.boolean() });
+export const idSchema = z.uuid();
+export const listQuerySchema = z.strictObject({ includeCompleted: z.enum(['true', 'false']).optional().transform(v => v === 'true') });
+export const todoSchema = z.strictObject({ id: idSchema, title, description: description, dueAt: instant.nullable(), ordinal: z.number().int().nonnegative(), completed: z.boolean(), deleted: z.literal(false), createdAt: instant, updatedAt: instant });
+export const todoResponseSchema = z.object({ data: todoSchema });
+export const listResponseSchema = z.object({ data: z.array(todoSchema) });

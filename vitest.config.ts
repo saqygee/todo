@@ -1,0 +1,2 @@
+import { defineConfig } from 'vitest/config';
+export default defineConfig({ test: { maxWorkers: 2, projects: [ { test: { name: 'unit', environment: 'node', include: ['tests/unit/**/*.test.ts'] } }, { test: { name: 'integration', environment: 'node', include: ['tests/integration/**/*.test.ts'], testTimeout: 15000, hookTimeout: 30000 } }, { test: { name: 'components', environment: 'jsdom', include: ['tests/unit/**/*.test.tsx'], setupFiles: ['tests/unit/client/setup.ts'] } } ] } });
