@@ -37,7 +37,14 @@ Legacy overdue records remain valid in read/response schemas.
 
 Retained → Change opens replacement selection; retained/replacement → Clear removes the whole
 group. Keep existing can discard a replacement draft. None of these modes is stored as a new
-entity. Form Save/Cancel and pending behaviour stay as defined in the original feature.
+entity. A complete valid replacement also carries a canonical UTC candidate in transient state.
+On browser timezone change, derive its new display components from that candidate without
+changing the instant or losing precision. Only a user field edit invalidates/recomputes the
+candidate. Clock refresh still revalidates future eligibility.
+
+Partial drafts carry no UTC candidate: retain entered components, refresh local availability and
+ask the user to review/complete them. Do not autofill or fabricate an instant. Form Save/Cancel
+and pending behaviour stay as defined in the original feature.
 
 ## Eligibility
 

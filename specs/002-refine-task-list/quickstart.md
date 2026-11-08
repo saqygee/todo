@@ -53,7 +53,11 @@ new create requests cannot introduce past due values. Test direct HTTP bypass, n
    Race a stored due change against a stale supplied past value; it must not get an unchanged
    exemption against obsolete data. Advance the service clock during transaction retry.
 6. Verify UTC/offset normalisation and local display in UTC, Asia/Tokyo, America/New_York and
-   Europe/London, including DST gap/repeated-hour cases. Read schemas still accept overdue data.
+   Europe/London, including DST gap/repeated-hour cases. Select a complete future due time,
+   change the browser timezone while the form is open, refocus and verify displayed components
+   change while submitted UTC milliseconds remain identical. Repeat with a partial draft: entered
+   components remain with review guidance, and no instant is invented. Read schemas still accept
+   overdue data.
 7. On empty, populated, loading and error lists, verify both buttons are above/top-right, create
    first. At 320 CSS pixels and 200% zoom, check wrapping/order, no horizontal scrolling and
    unclipped focus. Create/edit Save/Cancel still restores list/filter state as before.

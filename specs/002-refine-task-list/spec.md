@@ -73,6 +73,10 @@ a future day and an absent due date, then advance time before submission.
    replacement due value must satisfy the new future-only rule.
 7. **Given** a past value is typed, pasted or submitted without using the picker, **When** it is
    validated, **Then** it is rejected by the same rule as an invalid picker selection.
+8. **Given** a complete unsaved due selection, **When** the browser timezone changes and the form
+   regains focus, **Then** the same instant is displayed in the new local timezone and remains
+   subject to future-only validation. A partial selection retains its entered components with
+   review guidance and remains incomplete until the user finishes it.
 
 ---
 
@@ -140,6 +144,10 @@ activate and deactivate completed-item visibility using pointer and keyboard.
   editing MUST remain valid. Existing tasks MUST NOT be silently rescheduled.
 - **FR-008**: Provided due instants MUST retain the established UTC storage/exchange and browser-
   local presentation rules, including timezone-qualified input and daylight-saving validity.
+  If the browser timezone changes while a complete selection is unsaved, its underlying instant
+  MUST remain unchanged and its displayed components MUST reflect the new timezone. Partial
+  selections MUST retain entered components with guidance to review them, without inventing
+  a due instant or silently filling missing values.
 - **FR-009**: The list view MUST position "create new task" and "Display completed" above the
   list, aligned to its right edge, with create preceding display in visual and keyboard order.
   Both MUST remain available for empty or failed list states and wrap without horizontal overflow.

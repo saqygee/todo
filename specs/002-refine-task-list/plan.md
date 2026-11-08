@@ -150,7 +150,17 @@ Use a clock parameter in pure eligibility/conversion helpers for deterministic t
 form is open, refresh the clock at minute boundaries and on window focus/pageshow and relevant
 field focus/change. Clean up timers/listeners. Recompute again during save. If a selected value
 expires, retain it visibly with an associated error until corrected or cleared; do not silently
-advance it. Browser timezone changes are handled by recomputing local components on focus.
+advance it. Detect browser timezone changes on focus/pageshow. For a complete valid selection,
+retain its canonical UTC instant and derive new local date/hour/minute display components from
+that same instant in the new zone, preserving milliseconds and repeated-hour identity. Do not
+reinterpret unchanged displayed components or re-resolve an ambiguous hour to a different instant.
+Invalidate/recompute the candidate when the user changes a field; merely refreshing the clock or
+timezone must not change its instant. Future-only validation still applies when saving.
+
+For a partial draft there is no canonical instant. Retain its entered local components, refresh
+today/eligibility in the new timezone and show guidance to review/complete the selection. Do not
+invent missing values or silently convert partial input into a scheduled instant. Retained
+existing due values continue to preserve their original instant in either timezone.
 
 For editing, retain the full original UTC instant separately from minute-level control text.
 An existing due value is initially shown as a retained current value, with Change and Clear
@@ -223,8 +233,10 @@ Update the CDP/Orca script to assert the intended sequence rather than its old s
 2. US2 red pure-policy, service and API tests with controlled clocks, including direct bypass,
    unchanged overdue, stale stored context and elapsed-before-write/retry cases. Implement the
    shared rule and transactional callback integration without schema changes.
-3. US2 red component/timezone tests; implement native calendar/hour/minute UI, dynamic disabled
-   options, optional/partial/clear/retained modes and inline error mapping. Verify no response
+3. US2 red component/timezone and form integration tests, including retained/change/clear and
+   open-form timezone changes; observe these failures before implementing those modes. Implement native calendar/hour/minute UI, dynamic disabled
+   options, optional/partial/clear/retained modes and inline error mapping, then pass the earlier form integration
+   assertions. Verify no response
    schema starts rejecting existing overdue data.
 4. US3 red layout/filter-state assertions; move actions and style both states and forced-colors.
 5. Run existing test projects, strict type checks, lint and build. Extend native-CDP scenarios

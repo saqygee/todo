@@ -56,3 +56,13 @@ reversal disagrees with direct list results; colour alone does not meet accessib
 No unresolved product decisions, dependency requests or database migrations. Research findings
 are design choices, not claims of implementation or new accessibility acceptance. The follow-up
 validation must reuse the existing Chrome/Orca evidence process on the changed controls.
+
+## Open-Form Timezone Changes
+
+**Decision**: Preserve a complete unsaved selection as a canonical UTC instant and redisplay
+local components when the browser timezone changes. Retain partial components without a UTC
+candidate and show review guidance. Revalidate future eligibility on save in either case.
+**Rationale**: Reinterpreting the same wall-clock text in another timezone would silently
+reschedule the task; partial input cannot identify an instant yet.
+**Alternatives considered**: Leaving a complete selection’s text unchanged changes its instant.
+Autofilling an incomplete draft invents user intent. No persisted timezone field is needed.
