@@ -3,30 +3,35 @@
   "primaryButtonContrast": 9.335954792031012,
   "accessibleButtonNames": true,
   "keyboardSpaceToggle": true,
+  "calendar": "native min/disabled current minute/expiry retention/complete timezone instant/partial review passed",
+  "topRightActions": true,
+  "descendingOrder": true,
+  "activeFilterCue": true,
   "flow": "create/cancel/validate/complete/reopen/edit/delete passed",
   "timing": {
     "list": {
       "trials": 20,
       "under2seconds": 20,
-      "maxMs": 116,
-      "medianMs": 92
+      "maxMs": 84,
+      "medianMs": 64
     },
     "filter": {
       "trials": 20,
       "under2seconds": 20,
-      "maxMs": 157,
-      "medianMs": 100
+      "maxMs": 93,
+      "medianMs": 66
     },
     "write": {
       "trials": 20,
       "under2seconds": 20,
-      "maxMs": 222,
-      "medianMs": 174
+      "maxMs": 149,
+      "medianMs": 129
     }
   },
   "mobileOverflow": false,
   "screenshots": [
     "/tmp/todo-empty.png",
-    "/tmp/todo-list.png"
+    "/tmp/todo-list.png",
+    "/tmp/todo-calendar.png"
   ]
 }

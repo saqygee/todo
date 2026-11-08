@@ -15,3 +15,16 @@ it('opens an edit form, preserves unchanged dueAt, clears optional fields and re
     await waitFor(() => expect(todoApi.update).toHaveBeenCalledWith(task.id, { title: 'A task', description: null, dueAt: task.dueAt }));
     await screen.findByRole('button', { name: 'create new task' });
 });
+import {TodoForm} from '../../../src/client/components/todo/TodoForm.js';
+it('retains an overdue exact instant until explicitly changed or cleared',async()=>{
+ const save=vi.fn(async()=>{});const old={...task,dueAt:'2020-01-01T12:00:00.123Z'};
+ render(<TodoForm item={old} onSave={save} onCancel={vi.fn()}/>);
+ fireEvent.click(screen.getByRole('button',{name:'Change due date'}));
+ expect((screen.getByLabelText(/^Due date/) as HTMLInputElement).value).toBe('');
+ fireEvent.click(screen.getByRole('button',{name:'Keep existing due date'}));
+ fireEvent.click(screen.getByRole('button',{name:'Save task'}));
+ await waitFor(()=>expect(save).toHaveBeenLastCalledWith({title:old.title,description:old.description,dueAt:old.dueAt}));
+ fireEvent.click(screen.getByRole('button',{name:'Clear due date'}));
+ fireEvent.click(screen.getByRole('button',{name:'Save task'}));
+ await waitFor(()=>expect(save).toHaveBeenLastCalledWith({title:old.title,description:old.description,dueAt:null}));
+});

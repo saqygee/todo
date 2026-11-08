@@ -10,11 +10,11 @@
   box-sizing:border-box}
 body {
   margin:0}
-button,input,textarea {
+button,input,textarea,select {
   font:inherit}
-button,a,input,textarea {
+button,a,input,textarea,select {
   outline-offset:5px}
-button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible {
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible {
   outline:3px solid #be6a26}
 button {
   cursor:pointer;
@@ -88,7 +88,7 @@ h1 em {
   color:var(--green)}
 .list-layout {
   display:grid;
-  grid-template-columns:minmax(0,1fr) 220px;
+  grid-template-columns:minmax(0,1fr);
   gap:28px;
   align-items:start}
 .list-panel {
@@ -113,7 +113,9 @@ h2 {
   color:#4d634f}
 .list-actions {
   display:flex;
-  flex-direction:column;
+  flex-direction:row;
+  flex-wrap:wrap;
+  justify-content:flex-end;
   gap:12px}
 .primary,.secondary {
   min-height:48px;
@@ -132,14 +134,8 @@ h2 {
   background:transparent;
   border:1px solid #75866d;
   color:#2e4938}
-.secondary:hover,.secondary[aria-pressed=true] {
+.secondary:hover {
   background:#e3eadb}
-.aside-note {
-  font:italic 19px/1.5 Georgia;
-  color:#566650;
-  border-top:1px solid var(--line);
-  margin:14px 0 0;
-  padding:24px 8px}
 .empty-state {
   text-align:center;
   padding:65px 25px 72px}
@@ -221,14 +217,14 @@ h2 {
   font-weight:400;
   color:#68736b;
   font-size:11px}
-input,textarea {
+input,textarea,select {
   width:100%;
   background:#fffefb;
   border:1px solid #75866d;
   border-radius:5px;
   padding:13px;
   color:#20392f}
-input[aria-invalid=true],textarea[aria-invalid=true] {
+input[aria-invalid=true],textarea[aria-invalid=true],select[aria-invalid=true] {
   border-color:#a3332d}
 textarea {
   resize:vertical}
@@ -300,8 +296,6 @@ main {
   flex-direction:row;
   flex-wrap:wrap;
   grid-row:1}
-.aside-note {
-  display:none}
 .task {
   padding:22px 18px;
   flex-wrap:wrap}
@@ -318,3 +312,18 @@ footer {
   flex-direction:column}
 }
 
+
+.secondary[aria-pressed=true] { background:#204f3e; color:#fff; border-color:#204f3e; }
+.filter-indicator { display:inline-block; width:1.2em; margin-right:5px; font-weight:700; }
+.due-fields { border:0; padding:0; margin:24px 0 0; min-width:0; }
+.due-fields legend { font-size:14px; font-weight:700; }
+.due-controls { display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr); gap:16px; }
+.due-controls .field { min-width:0; margin-top:12px; }
+.due-controls input,.due-controls select { min-width:0; }
+.due-actions { display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; }
+@media(max-width:600px) { .due-controls { grid-template-columns:minmax(0,1fr); } }
+@media(forced-colors:active) {
+  .secondary[aria-pressed=true] { border:3px solid Highlight; }
+  .filter-indicator { color:ButtonText; }
+  button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible { outline:3px solid Highlight; }
+}

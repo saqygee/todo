@@ -49,3 +49,33 @@ The reviewer inspected generated Orca utterances; this report does not claim to 
 to audio or tested NVDA/VoiceOver. This is scoped acceptance evidence for the implemented
 assessment flows, not an independent certification of every browser/assistive-technology pair.
 No outstanding accessibility defects were identified in the reviewed scope.
+
+## Feature 002 — Refined List and Native Due-Date Selection
+
+Latest review: 2026-11-08. This section supersedes the original segmented datetime-local control
+and sidebar traversal observations above. Final graphical Chrome/Orca run passed **13 steps**,
+produced **108 utterances**, and found **zero text contrast issues**. The transcript was inspected;
+this is generated-speech review, not an assertion of listening to audio.
+
+- Actions precede the list, create before Display completed. Keyboard CRUD, form return and
+  heading focus after completion/deletion pass with the new DOM order.
+- Space opens Chrome's native calendar. Its grid and previous/next month controls are exposed.
+  ArrowDown/Enter select a future date; Escape dismisses; Tab and arrows select hour/minute;
+  keyboard save returns to the list. No third-party calendar is used.
+- Orca announces native day/month/year segments, calendar date, Hour (24-hour), Minute,
+  “Choose an hour.”, “Choose a minute.” and “Choose a future due date and time.”
+- Current-minute options are disabled; partial and expired values retain accessible errors.
+  Change, Keep existing and Clear controls support overdue edits. Some validation/legacy fixtures
+  are entered programmatically to establish the scenario; the complete calendar/time save and
+  primary CRUD flows are exercised through keyboard input.
+- Active filtering has a checkmark plus aria-pressed, a different colour, and a distinct border
+  under forced-colors. Contrast checks wait for palette transitions to finish.
+- At 320 CSS pixels and 200% zoom, actions remain above the list with no horizontal overflow.
+  Inspected desktop screenshots also show the native date/hour/minute form and top-right actions.
+
+The harness requires xdotool to activate only its own test Chrome window and waits for Orca
+startup before keyboard input. Initial runs revealed harness timing, desktop pixel rounding and
+an incorrect Alt+Down assumption; those were corrected before the passing acceptance run.
+The form error-focus regression was fixed by deferring focus until the pending fieldset is enabled.
+The reviewed scope has no outstanding finding. NVDA, VoiceOver and other browser combinations
+were not tested. Full feature results: [validation-results.md](../../specs/002-refine-task-list/validation-results.md).

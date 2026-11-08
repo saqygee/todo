@@ -3,7 +3,12 @@
 A small React + Express application for creating, editing, completing and soft-deleting tasks.
 The list hides completed tasks by default. **Display completed** includes them alongside unfinished
 work; **create new task** replaces the list with a form until Save or Cancel returns you to it.
-Only the title is required. Description and due date are optional, with inline validation errors.
+Tasks appear newest first by immutable ordinal. Both actions sit above the list at the top right;
+the active completed filter uses a green background, checkmark and accessible pressed state.
+Only the title is required. Description and due date are optional, with errors below each control.
+Choose an optional due date with the native calendar and Hour/Minute selectors. Elapsed choices
+are unavailable. New or changed dates must still be in the future when saved; unchanged overdue
+dates can be kept during edits, or explicitly changed/cleared. Dates display in your local timezone.
 
 ## Run locally
 
@@ -67,7 +72,7 @@ node tests/e2e/browser-check.mjs
 It uses a disposable database and local server, verifies CRUD, validation, focus, keyboard button
 activation, accessible names and responsive layout, and times 20 trials per action with 100 tasks.
 Evidence and the completed Orca accessibility review are in
-[validation-results.md](specs/001-todo-crud/validation-results.md).
+[validation-results.md](specs/002-refine-task-list/validation-results.md).
 
 ## Design choices
 
@@ -78,15 +83,20 @@ Evidence and the completed Orca accessibility review are in
   constraint, WAL mode and bounded asynchronous retries.
 - Explicit Boolean completion updates; Boolean soft deletion excludes records from normal access.
 - ISO 8601 timezone-qualified date input, UTC storage/responses and browser-local presentation.
+  No calendar dependency: native date input and disabled hour/minute options, refreshed each minute
+  and on focus. Complete unsaved selections retain their exact UTC instant across timezone changes;
+  partial entries stay local with review guidance. DST gaps are rejected; repeated times use the
+  earlier occurrence. Service-owned date validation runs inside each create/update transaction,
+  rechecking the clock and current row on bounded retries.
 - React Hook Form + Zod and Axios; no global state framework or dependency injection container.
 - No authentication, multiple users, reordering, restoration or public deployment configuration.
   This application is intended for the local single-user assessment.
 
-See the [API contract](specs/001-todo-crud/contracts/rest-api.md),
-[implementation plan](specs/001-todo-crud/plan.md),
-[task progress](specs/001-todo-crud/tasks.md), and
-[acceptance guide](specs/001-todo-crud/quickstart.md).
+See the [updated API contract](specs/002-refine-task-list/contracts/rest-api.md),
+[implementation plan](specs/002-refine-task-list/plan.md),
+[task progress](specs/002-refine-task-list/tasks.md), and
+[acceptance guide](specs/002-refine-task-list/quickstart.md).
 
-For the screen-reader/keyboard/contrast review, with Orca, AT-SPI, D-Bus and a graphical DISPLAY
+For the screen-reader/keyboard/contrast review, with Orca, AT-SPI, D-Bus, xdotool and a graphical DISPLAY
 already available, run `dbus-run-session -- node tests/e2e/accessibility-check.mjs` after building.
 See [accessibility evidence](tests/e2e/manual-acceptance.md) for reviewed scope and findings.

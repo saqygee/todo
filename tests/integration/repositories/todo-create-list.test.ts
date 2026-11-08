@@ -49,3 +49,14 @@ it('allocates unique ordinals for overlapping creates and rolls failed writes ba
         await ctx.close();
     }
 });
+it('lists newest first in both filters, without renumbering gaps or moving edited tasks',async()=>{
+ const ctx=await testDatabase();try{
+ await ctx.db.todo.createMany({data:[{title:'Old',ordinal:0},{title:'Done',ordinal:2,completed:true},{title:'New',ordinal:5},{title:'Deleted',ordinal:7,deleted:true}]});
+ const repo=createTodoRepository(ctx.db);
+ expect((await repo.list(false)).map(t=>t.ordinal)).toEqual([5,0]);
+ expect((await repo.list(true)).map(t=>t.ordinal)).toEqual([5,2,0]);
+ const oldest=(await repo.list(true)).find(t=>t.ordinal===0)!;await repo.update(oldest.id,{title:'Edited old'});
+ expect((await repo.list(true)).map(t=>t.ordinal)).toEqual([5,2,0]);
+ const added=await repo.create({title:'Newest',description:null,dueAt:null});expect(added.ordinal).toBe(8);expect((await repo.list(false))[0]?.id).toBe(added.id);
+ }finally{await ctx.close();}
+});

@@ -30,3 +30,25 @@ it('disables save/cancel during submission and restores list on success', async 
     finish();
     await screen.findByRole('button', { name: 'create new task' });
 });
+it('renders the descending response order and refreshes the newest task to the top',async()=>{
+ const stamp='2026-11-08T12:00:00Z';const base={description:null,dueAt:null,completed:false,deleted:false as const,createdAt:stamp,updatedAt:stamp};
+ const items=[{...base,id:'five',title:'Recent',ordinal:5},{...base,id:'zero',title:'Older',ordinal:0}];
+ vi.mocked(todoApi.list).mockResolvedValueOnce(items).mockResolvedValueOnce([{...base,id:'six',title:'Newest',ordinal:6},...items]);
+ vi.mocked(todoApi.create).mockResolvedValueOnce({...base,id:'six',title:'Newest',ordinal:6});
+ render(<TodosPage/>);await screen.findByText('Recent');expect(screen.getAllByRole('heading',{level:3}).map(h=>h.textContent)).toEqual(['Recent','Older']);
+ fireEvent.click(screen.getByRole('button',{name:'create new task'}));fireEvent.change(screen.getByLabelText('Title'),{target:{value:'Newest'}});fireEvent.click(screen.getByRole('button',{name:'Save task'}));await screen.findByText('Newest');expect(screen.getAllByRole('heading',{level:3})[0]?.textContent).toBe('Newest');
+});
+it('places persistent actions before the list with a non-colour active filter cue',async()=>{
+ render(<TodosPage/>);
+ const create=screen.getByRole('button',{name:'create new task'});
+ const display=screen.getByRole('button',{name:'Display completed'});
+ const panel=screen.getByRole('region',{name:'Your tasks'});
+ expect(create.compareDocumentPosition(display)&Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+ expect(display.compareDocumentPosition(panel)&Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+ expect(display.getAttribute('aria-pressed')).toBe('false');
+ fireEvent.click(display);
+ await waitFor(()=>expect(display.getAttribute('aria-pressed')).toBe('true'));
+ expect(display.querySelector('[aria-hidden="true"]')?.textContent).toBe('✓');
+ fireEvent.click(create);fireEvent.click(screen.getByRole('button',{name:'Cancel'}));
+ expect(screen.getByRole('button',{name:'Display completed'}).getAttribute('aria-pressed')).toBe('true');
+});

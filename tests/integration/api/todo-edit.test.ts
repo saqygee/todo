@@ -25,3 +25,14 @@ it('edits only allowlisted content, clears nulls and keeps the last successful s
         await ctx.close();
     }
 });
+it('allows unchanged overdue instants or clearing, rejects changed past due dates without partial writes',async()=>{
+ const ctx=await testDatabase();try{
+ const now=Date.parse('2026-11-08T10:15:30Z');const item=await ctx.db.todo.create({data:{title:'Legacy',dueAt:new Date(now-1000),ordinal:0}});
+ const app=createApp({service:createTodoService(createTodoRepository(ctx.db),()=>now)});
+ expect((await request(app).patch('/api/todos/'+item.id).send({title:'Keep',dueAt:item.dueAt!.toISOString()})).status).toBe(200);
+ const bad=await request(app).patch('/api/todos/'+item.id).send({title:'Must not save',dueAt:new Date(now-2000).toISOString()});expect(bad.status).toBe(400);expect(bad.body.error.fields.dueAt).toBeTruthy();expect((await ctx.db.todo.findUnique({where:{id:item.id}}))?.title).toBe('Keep');
+ expect((await request(app).patch('/api/todos/'+item.id).send({dueAt:null})).body.data.dueAt).toBeNull();
+ await ctx.db.todo.update({where:{id:item.id},data:{deleted:true}});
+ for(const id of [item.id,'00000000-0000-4000-8000-000000000000'])expect((await request(app).patch('/api/todos/'+id).send({dueAt:new Date(now-2000).toISOString()})).status).toBe(404);
+ }finally{await ctx.close();}
+});

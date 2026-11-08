@@ -23,6 +23,17 @@ export function isRetryable(error: unknown): boolean {
         return true;
     return false;
 }
+async function retryWrite<T>(write: () => Promise<T>): Promise<T> {
+    for (let attempt = 0; attempt < 3; attempt++) {
+        try { return await write(); }
+        catch (error) {
+            if (!isRetryable(error)) throw error;
+            if (attempt === 2) throw new AppError(503, "STORAGE_BUSY", "Storage is busy. Please try again.");
+            await new Promise(resolve => setTimeout(resolve, 15 * (attempt + 1)));
+        }
+    }
+    throw new AppError(503, "STORAGE_BUSY", "Storage is busy. Please try again.");
+}
 export function createTodoRepository(db: Database): TodoRepository {
     let connectionReady: Promise<unknown> | undefined;
     const ready = () => connectionReady ??= db.$queryRaw `PRAGMA journal_mode = WAL`;
@@ -34,44 +45,36 @@ export function createTodoRepository(db: Database): TodoRepository {
                     deleted: false,
                     ...(!includeCompleted && { completed: false }),
                 },
-                orderBy: { ordinal: "asc" },
+                orderBy: { ordinal: "desc" },
             });
         },
         async find(id: string) {
             await ready();
             return db.todo.findFirst({ where: { id, deleted: false } });
         },
-        async create(input: CreateTodo) {
+        async create(input: CreateTodo, beforeWrite?: () => void) {
             await ready();
-            for (let attempt = 0; attempt < 3; attempt++) {
-                try {
-                    return await db.$transaction(async (tx) => {
-                        const max = await tx.todo.aggregate({ _max: { ordinal: true } });
-                        const ordinal = (max._max.ordinal ?? -1) + 1;
-                        if (ordinal > 2147483647)
-                            throw new AppError(409, "ORDINAL_EXHAUSTED", "No further task order values are available.");
-                        return tx.todo.create({
-                            data: {
-                                ...input,
-                                dueAt: input.dueAt ? new Date(input.dueAt) : null,
-                                ordinal,
-                            },
-                        });
-                    }, { timeout: 5000, maxWait: 5000 });
-                }
-                catch (e) {
-                    if (!isRetryable(e))
-                        throw e;
-                    if (attempt === 2)
-                        throw new AppError(503, "STORAGE_BUSY", "Storage is busy. Please try again.");
-                    await new Promise((resolve) => setTimeout(resolve, 15 * (attempt + 1)));
-                }
-            }
-            throw new AppError(503, "STORAGE_BUSY", "Storage is busy. Please try again.");
+            return retryWrite(() => db.$transaction(async (tx) => {
+                const max = await tx.todo.aggregate({ _max: { ordinal: true } });
+                const ordinal = (max._max.ordinal ?? -1) + 1;
+                if (ordinal > 2147483647)
+                    throw new AppError(409, "ORDINAL_EXHAUSTED", "No further task order values are available.");
+                beforeWrite?.();
+                return tx.todo.create({
+                    data: {
+                        ...input,
+                        dueAt: input.dueAt ? new Date(input.dueAt) : null,
+                        ordinal,
+                    },
+                });
+            }, { timeout: 5000, maxWait: 5000 }));
         },
-        async update(id: string, input: UpdateTodo) {
+        async update(id: string, input: UpdateTodo, beforeWrite?: (current: TodoRecord) => void) {
             await ready();
-            return db.$transaction(async (tx) => {
+            return retryWrite(() => db.$transaction(async (tx) => {
+                const current = await tx.todo.findFirst({ where: { id, deleted: false } });
+                if (!current) return null;
+                beforeWrite?.(current);
                 const data = {
                     ...input,
                     ...(input.dueAt !== undefined && {
@@ -85,7 +88,7 @@ export function createTodoRepository(db: Database): TodoRepository {
                 return result.count
                     ? tx.todo.findFirst({ where: { id, deleted: false } })
                     : null;
-            });
+            }, { timeout: 5000, maxWait: 5000 }));
         },
         async complete(id: string, completed: boolean) {
             await ready();
@@ -112,8 +115,8 @@ export function createTodoRepository(db: Database): TodoRepository {
 export interface TodoRepository {
     list(includeCompleted: boolean): Promise<TodoRecord[]>;
     find(id: string): Promise<TodoRecord | null>;
-    create(input: CreateTodo): Promise<TodoRecord>;
-    update(id: string, input: UpdateTodo): Promise<TodoRecord | null>;
+    create(input: CreateTodo, beforeWrite?: () => void): Promise<TodoRecord>;
+    update(id: string, input: UpdateTodo, beforeWrite?: (current: TodoRecord) => void): Promise<TodoRecord | null>;
     complete(id: string, completed: boolean): Promise<TodoRecord | null>;
     remove(id: string): Promise<boolean>;
 }

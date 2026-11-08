@@ -1,8 +1,7 @@
 # Quickstart Validation: Refine Task List and Due-Date Selection
 
-This is the validation guide for the follow-up feature; its changed behaviour is not yet built.
-Use the existing approved dependencies and migrated SQLite setup. No new installation or schema
-migration is proposed. Run commands from repository root after implementation.
+The follow-up feature is implemented. Use the existing approved dependencies and migrated SQLite
+setup. No new package or schema migration was introduced. Run commands from repository root.
 
 ## Build and Run
 
@@ -18,7 +17,7 @@ If port 3000 is occupied, use an available port without stopping the other appli
 PORT=3001 npm start
 ```
 
-Open the matching local URL. The currently running build is not changed by this planning step.
+Open the matching local URL. Start or restart your chosen local process to serve the new backend build.
 
 ## Automated Gates
 
@@ -67,16 +66,16 @@ new create requests cannot introduce past due values. Test direct HTTP bypass, n
 
 ## Browser and Screen-Reader Review
 
-Update the existing native-CDP scripts for descending order, top action geometry and changed
-keyboard traversal before running them. Do not preserve old sidebar-position assumptions.
+The native-CDP scripts check descending order, top action geometry, native calendar choices,
+timezone changes and the updated keyboard traversal. Each uses its own temporary database.
 
 ```bash
 node tests/e2e/browser-check.mjs
 dbus-run-session -- node tests/e2e/accessibility-check.mjs
 ```
 
-The latter requires the installed graphical Chrome, Orca, AT-SPI, D-Bus and DISPLAY. Verify
-calendar navigation/dismissal, disabled time options, partial-entry errors, retained overdue
+The latter requires the installed graphical Chrome, Orca, AT-SPI, D-Bus, xdotool and DISPLAY. Verify
+calendar navigation/dismissal (Space to open in the reviewed Chrome), disabled time options, partial-entry errors, retained overdue
 values and active filter indication through actual keyboard and Orca-generated speech output.
 Document exactly which browser/assistive-technology combination was reviewed; do not claim a
 cross-platform certification from an accessibility tree alone.

@@ -1,4 +1,38 @@
 {
+  "calendarNames": [
+    {
+      "role": "combobox",
+      "name": "Hour (24-hour)"
+    },
+    {
+      "role": "combobox",
+      "name": "Minute"
+    },
+    {
+      "role": "spinbutton",
+      "name": "Day Day"
+    },
+    {
+      "role": "spinbutton",
+      "name": "Month Month"
+    },
+    {
+      "role": "spinbutton",
+      "name": "Year Year"
+    },
+    {
+      "role": "button",
+      "name": "Show previous month"
+    },
+    {
+      "role": "button",
+      "name": "Show next month"
+    },
+    {
+      "role": "grid",
+      "name": ""
+    }
+  ],
   "screenReader": "Orca (isolated D-Bus session)",
   "steps": [
     "Keyboard create form entry focuses title",
@@ -9,42 +43,46 @@
     "Keyboard display completed and reopening preserve list",
     "Keyboard editing and save work",
     "Keyboard deletion returns to empty list",
-    "320 CSS pixel reflow has no horizontal overflow",
-    "200% zoom has no horizontal overflow"
+    "Native calendar opened with Space, navigated/selected with arrows and Enter, dismissed with Escape; hour/minute selected by arrows and saved using keyboard",
+    "Native disabled current-minute choice, associated partial/expired errors, retained/change/keep/clear controls checked",
+    "Forced-colors active toggle retains checkmark and distinct border",
+    "320 CSS pixel reflow has no horizontal overflow and actions stay above list",
+    "200% zoom has no horizontal overflow and actions stay above list"
   ],
   "contrastIssues": [],
-  "utteranceCount": 75,
+  "utteranceCount": 108,
   "speechSamples": [
     "SPEECH OUTPUT: 'Screen reader on.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
     "SPEECH OUTPUT: 'Title entry What would you like to do?' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
-    "SPEECH OUTPUT: 'invalid entry: Enter a title.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+    "SPEECH OUTPUT: 'Enter a title.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
     "SPEECH OUTPUT: 'Enter a title.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
     "SPEECH OUTPUT: 'Title entry What would you like to do?' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
     "SPEECH OUTPUT: 'invalid entry: Enter a title.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
-    "SPEECH OUTPUT: 'Enter a title.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
-    "SPEECH OUTPUT: 'complementary content Task list actions' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
     "SPEECH OUTPUT: 'Task created.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
     "SPEECH OUTPUT: 'Title entry What would you like to do?' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
     "SPEECH OUTPUT: 'Save task push button.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
     "SPEECH OUTPUT: 'Cancel push button.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
-    "SPEECH OUTPUT: 'complementary content Task list actions' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
-    "SPEECH OUTPUT: 'Delete: Screen reader task push button.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
-    "SPEECH OUTPUT: 'Edit: Screen reader task push button.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
-    "SPEECH OUTPUT: 'Mark complete: Screen reader task check box not ticked.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
-    "SPEECH OUTPUT: 'complementary content Task list actions' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
-    "SPEECH OUTPUT: 'Task completed.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
     "SPEECH OUTPUT: 'Display completed toggle button not pressed.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
-    "SPEECH OUTPUT: 'Delete: Screen reader task push button.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
-    "SPEECH OUTPUT: 'Edit: Screen reader task push button.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+    "SPEECH OUTPUT: 'Mark complete: Screen reader task check box not ticked.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+    "SPEECH OUTPUT: 'Display completed toggle button not pressed.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+    "SPEECH OUTPUT: 'Task completed.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
     "SPEECH OUTPUT: 'Mark incomplete: Screen reader task check box ticked.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
     "SPEECH OUTPUT: 'Mark complete: Screen reader task check box not ticked.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
     "SPEECH OUTPUT: 'Task reopened.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
     "SPEECH OUTPUT: 'Edit: Screen reader task push button.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
-    "SPEECH OUTPUT: 'Title entry Screen reader task.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
-    "SPEECH OUTPUT: 'complementary content Task list actions' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+    "SPEECH OUTPUT: 'Title entry What would you like to do?' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+    "SPEECH OUTPUT: 'Display completed toggle button pressed.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
     "SPEECH OUTPUT: 'Task updated.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
-    "SPEECH OUTPUT: 'Delete: Screen reader edited push button greyed.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
-    "SPEECH OUTPUT: 'Task deleted.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}"
+    "SPEECH OUTPUT: 'Mark complete: Screen reader edited check box not ticked.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+    "SPEECH OUTPUT: 'Edit: Screen reader edited push button.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+    "SPEECH OUTPUT: 'Delete: Screen reader edited push button.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+    "SPEECH OUTPUT: 'Task deleted.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+    "SPEECH OUTPUT: 'Title entry Calendar keyboard task.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+    "SPEECH OUTPUT: 'Save task push button.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+    "SPEECH OUTPUT: 'Task created.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+    "SPEECH OUTPUT: 'Title entry Partial keyboard task.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+    "SPEECH OUTPUT: 'Display completed toggle button not pressed.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}",
+    "SPEECH OUTPUT: 'Title entry Legacy overdue.' {'established': False, 'family': {'name': None, 'gender': None, 'lang': None, 'dialect': None, 'variant': None}}"
   ],
   "speechBackend": "Orca generated speech transcript reviewed; no claim of listening to audio",
   "fullSpeechLog": "/tmp/todo-orca-speech.txt"

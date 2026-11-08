@@ -4,5 +4,5 @@ export function TodoListActions({ includeCompleted, onCreate, onToggle }: {
     onCreate: () => void;
     onToggle: () => void;
 }) {
-    return <aside className="list-actions" aria-label="Task list actions"><button className="primary" onClick={onCreate}>create new task</button><button className="secondary" aria-pressed={includeCompleted} onClick={onToggle}>Display completed</button><p className="aside-note">One thing at a time.<br />You’ve got this.</p></aside>;
+    return <aside className="list-actions" aria-label="Task list actions"><button className="primary" onClick={onCreate}>create new task</button><button className="secondary" aria-pressed={includeCompleted} onClick={onToggle}><span className="filter-indicator" aria-hidden="true">{includeCompleted ? "✓" : ""}</span>Display completed</button></aside>;
 }
