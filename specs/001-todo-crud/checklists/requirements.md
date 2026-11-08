@@ -36,7 +36,8 @@
   The requested code layout is preserved separately in planning-constraints.md.
 - Validation, cancellation, persistence, unavailable items, failures, concurrency, accessibility
   and timezone boundaries are covered in acceptance scenarios, edge cases and outcomes.
-- Defaults for task fields, limits, root directory interpretation and excluded features are
-  explicit assumptions for review during planning.
+- Latest field limits, required description/due date and Boolean deletion are reconciled in
+  spec.md; lifetime ordinals were explicitly confirmed during planning. Root directory
+  interpretation and excluded features remain documented assumptions.
 - This checklist assesses specification readiness; it does not assert implementation exists or
   that acceptance tests have already passed.

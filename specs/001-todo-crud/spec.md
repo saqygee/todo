@@ -18,6 +18,15 @@ multiple users and reordering are out of scope. The supplied directory layout is
 
 - Q: If the same ToDo is edited in two browser tabs, how should conflicting saves be handled? → A: Last successful save wins; no conflict warning.
 
+- Q: Does deletion change ordinal allocation? → A: Keep the lifetime sequence, including soft-deleted records when finding the maximum.
+
+### Planning Requirements Update 2026-11-08
+
+The planning request explicitly supersedes earlier field defaults: title is limited to 120
+characters; description is required and limited to 500 characters; dueAt is required; deletion
+uses a Boolean without a deletion timestamp. These changes are integrated below. The two-tab
+experience and the accepted last-successful-save rule remain in force.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - View and Create ToDos (Priority: P1)
@@ -44,6 +53,8 @@ visible in their original order. A seeded list can independently verify list fil
    **Then** a clear validation message appears and no record is created.
 6. **Given** saved ToDos, **When** the user reloads or the application restarts, **Then** their
    content, status and ordering are preserved.
+7. **Given** a blank description or missing, invalid or timezone-less due date, **When** the
+   user submits, **Then** an error appears below each invalid input and no record is created.
 
 ---
 
@@ -78,14 +89,14 @@ As the user, I can correct or update the content of an incomplete or completed T
 
 **Acceptance Scenarios**:
 
-1. **Given** a non-deleted ToDo in either tab, **When** valid title or description changes are
+1. **Given** a non-deleted ToDo in either tab, **When** valid title, description or due date/time changes are
    saved, **Then** the saved content appears and the ordinal and completion status are unchanged.
 2. **Given** an edit in progress, **When** the user cancels, **Then** saved content is unchanged.
 3. **Given** invalid content, **When** the user saves, **Then** validation feedback appears,
    entered content remains available for correction, and saved data is unchanged.
 4. **Given** the same non-deleted ToDo is open for editing in two browser tabs, **When** both
    submit valid content edits successfully, **Then** the last successful save determines the
-   saved title and description, without an outdated-edit rejection or conflict warning.
+   saved title, description and due date/time, without an outdated-edit rejection or conflict warning.
 
 ---
 
@@ -101,7 +112,7 @@ item and verify its ordinal is 3. Repeat after deleting the highest ordinal and 
 **Acceptance Scenarios**:
 
 1. **Given** a non-deleted ToDo in either tab, **When** deletion succeeds, **Then** it disappears
-   from both tabs and remains retained as a soft-deleted record with a deletion timestamp.
+   from both tabs and remains retained as a soft-deleted record with its deleted flag set to true.
 2. **Given** a deleted item, **When** the list reloads or an attempt is made to retrieve, edit or
    change its completion status, **Then** it remains unavailable and unchanged.
 3. **Given** any deletion, **When** remaining items are listed, **Then** their ordinals are
@@ -133,33 +144,37 @@ item and verify its ordinal is 3. Repeat after deleting the highest ordinal and 
 
 - **FR-001**: The system MUST provide one persistent ToDo list for a single user without login,
   registration, accounts, ownership assignment or multiple-user functionality.
-- **FR-002**: The user MUST be able to create a ToDo with a required title and optional description.
-  Newly created items MUST be incomplete.
-- **FR-003**: Titles MUST be trimmed, contain 1–200 characters after trimming, and descriptions
-  MUST contain at most 2,000 characters. Invalid input MUST be rejected with field-level feedback.
+- **FR-002**: The user MUST be able to create a ToDo with a required title, required description
+  and required due date/time. Newly created items MUST be incomplete.
+- **FR-003**: Titles MUST be trimmed, contain 1–120 characters after trimming, and descriptions
+  MUST be trimmed and contain 1–500 characters. A due date/time MUST be a valid ISO 8601 value
+  with an explicit timezone; it MUST be normalised to UTC. Invalid input MUST be rejected with
+  field-level feedback.
 - **FR-004**: The user MUST be able to view non-deleted items in two tabs: Incomplete first and
   Completed second. The initial/default list MUST contain only incomplete items; completed items
   MUST be shown only when the user chooses the Completed tab.
 - **FR-005**: Each tab MUST display its items in ascending ordinal order.
 - **FR-006**: The system MUST assign ordinals automatically, starting at 0 and using the maximum
-  assigned ordinal across all retained records plus one. Deleted records MUST participate in
-  this calculation; clients MUST NOT assign or change ordinals. Overlapping creates MUST not
-  produce duplicate ordinals.
-- **FR-007**: The user MUST be able to edit a non-deleted item's title and description in either
-  tab without changing its ordinal, identity, creation timestamp or completion status.
+  assigned ordinal across all retained records plus one. Deleted records MUST participate in this
+  calculation; clients MUST NOT assign or change ordinals. Overlapping creates MUST not produce
+  duplicate ordinals.
+- **FR-007**: The user MUST be able to edit a non-deleted item's title, description and due
+  date/time in either tab without changing its ordinal, identity, creation timestamp or completion
+  status.
 - **FR-008**: The user MUST be able to mark incomplete items completed and completed items
   incomplete. Each successful change MUST move the item to the appropriate tab while preserving
   its ordinal and content.
-- **FR-009**: Every deletion MUST be a soft deletion that records the deletion time, retains the
+- **FR-009**: Every deletion MUST be a soft deletion that sets deleted to true, retains the
   record, excludes it from both tabs and normal retrieval, and prevents subsequent editing or
   completion changes. Other ordinals MUST remain unchanged. Restoration is out of scope.
 - **FR-010**: Creation, edits, completion changes and deletion MUST persist across reloads and
   application restarts. Invalid or failed operations MUST NOT partially change saved records.
-- **FR-011**: Creation, last-update and deletion timestamps MUST be stored in UTC using ISO 8601
-  representation. New items MUST initialise creation and last-update times; successful content,
-  status and deletion changes MUST update the last-update time while preserving creation time.
-- **FR-012**: Each visible ToDo MUST display its creation and last-update date/time in the user's
-  current browser timezone, correctly handling date boundaries and daylight-saving rules.
+- **FR-011**: Creation, last-update and due date/time MUST be stored in UTC and exchanged using
+  consistent ISO 8601 UTC representation. New items MUST initialise creation and last-update
+  times; successful content, status and deletion changes MUST update the last-update time while
+  preserving creation time.
+- **FR-012**: Each visible ToDo MUST display its due, creation and last-update date/time in the
+  user's current browser timezone, correctly handling date boundaries and daylight-saving rules.
 - **FR-013**: The interface MUST explicitly communicate loading, empty, success and error states,
   retain unsaved form input after validation/write failures, and provide retries for failed reads.
   Errors MUST NOT disclose sensitive information or internal implementation details.
@@ -169,16 +184,23 @@ item and verify its ordinal is 3. Repeat after deleting the highest ordinal and 
 - **FR-015**: Missing, invalid or deleted item references MUST return a clear unavailable or
   invalid-input outcome without modifying data or exposing retained deleted content.
 - **FR-016**: Reordering controls and reordering operations MUST remain outside this feature.
-- **FR-017**: When multiple browser tabs save conflicting content edits to a non-deleted ToDo,
-  the last successful save MUST determine its title and description. The system MUST NOT reject
-  a content edit solely because it was based on older content or display a conflict warning.
-  Content edits MUST preserve current completion status and MUST NOT restore deleted records.
+- **FR-017**: When multiple browser tabs save conflicting content edits to a non-deleted ToDo, the
+  last successful save MUST determine its title, description and due date/time. The system MUST
+  NOT reject a content edit solely because it was based on older content or display a conflict
+  warning. Content edits MUST preserve current completion status and MUST NOT restore deleted
+  records.
+- **FR-018**: The default list MUST exclude completed records. An explicit includeCompleted=true
+  request MUST return both incomplete and completed non-deleted records. The Completed tab MUST
+  display only completed items from that result.
+- **FR-019**: Completion changes MUST accept an explicit Boolean state. Client requests MUST NOT
+  set ID, ordinal, timestamps or deleted status. Each validation error MUST appear immediately
+  below its corresponding input.
 
 ### Key Entities *(include if feature involves data)*
 
-- **ToDo**: An everyday task with a stable unique identifier, title, optional description,
-  completion status, automatically assigned non-negative integer ordinal, creation time,
-  last-update time and optional deletion time. An absent deletion time denotes a non-deleted
+- **ToDo**: An everyday task with a stable unique identifier, title, required description,
+  required due date/time, completion status, automatically assigned non-negative integer ordinal,
+  creation time, last-update time and deleted flag. A false deleted flag denotes a non-deleted
   item. There is no user/owner entity or task-to-user relationship.
 - **List view**: The currently selected completion category. Both categories share the same
   underlying ordinal sequence; category changes do not create a new ordering.
@@ -204,13 +226,13 @@ item and verify its ordinal is 3. Repeat after deleting the highest ordinal and 
 
 ## Assumptions
 
-- A required title and optional description are sufficient task content. Title and description
-  limits are defaults of 200 and 2,000 characters; due dates, priorities, tags, search, pagination,
+- Task content consists of a required title, required description and required due date/time.
+  Title and description limits are 120 and 500 characters. Priorities, tags, search, pagination,
   bulk actions, restoration and offline operation are outside this feature.
 - Ordinals are a single lifetime sequence across both completion categories and soft-deleted
   records; they are ordering data rather than editable user content.
 - The browser timezone defines the user's local timezone; a timezone preference control is not
-  required. Creation and last-update times are the user-visible timestamps.
+  required. Due, creation and last-update times are user-visible.
 - Deletion takes effect when selected and successfully saved; a confirmation dialog is not
   required. There is no permanent deletion or deleted-items view in this feature.
 - The agreed assessment environment is a current desktop browser and a locally running
