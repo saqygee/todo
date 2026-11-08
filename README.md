@@ -66,7 +66,7 @@ node tests/e2e/browser-check.mjs
 
 It uses a disposable database and local server, verifies CRUD, validation, focus, keyboard button
 activation, accessible names and responsive layout, and times 20 trials per action with 100 tasks.
-Evidence and remaining manual accessibility work are in
+Evidence and the completed Orca accessibility review are in
 [validation-results.md](specs/001-todo-crud/validation-results.md).
 
 ## Design choices
@@ -86,3 +86,7 @@ See the [API contract](specs/001-todo-crud/contracts/rest-api.md),
 [implementation plan](specs/001-todo-crud/plan.md),
 [task progress](specs/001-todo-crud/tasks.md), and
 [acceptance guide](specs/001-todo-crud/quickstart.md).
+
+For the screen-reader/keyboard/contrast review, with Orca, AT-SPI, D-Bus and a graphical DISPLAY
+already available, run `dbus-run-session -- node tests/e2e/accessibility-check.mjs` after building.
+See [accessibility evidence](tests/e2e/manual-acceptance.md) for reviewed scope and findings.

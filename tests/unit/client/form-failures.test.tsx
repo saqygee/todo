@@ -9,6 +9,7 @@ it('retains entered content and re-enables controls after server validation fail
     fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Keep this' } });
     fireEvent.click(screen.getByRole('button', { name: 'Save task' }));
     await screen.findByText('Title rejected');
+    expect(screen.getByLabelText('Title').getAttribute('aria-errormessage')).toBe('title-error');
     await waitFor(() => expect(screen.getByRole('button', { name: 'Cancel' }).hasAttribute('disabled')).toBe(false));
     expect((screen.getByLabelText('Title') as HTMLInputElement).value).toBe('Keep this');
     expect(document.getElementById('title-error')?.previousElementSibling?.tagName).toBe('INPUT');

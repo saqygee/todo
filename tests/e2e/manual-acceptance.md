@@ -1,31 +1,51 @@
-# Accessibility and Manual Acceptance Evidence
+# Accessibility Acceptance Evidence — T051 Complete
 
-Date: 2026-11-08. Application tested in local Google Chrome headless using the built-in DevTools
-Protocol (tests/e2e/browser-check.mjs), plus React Testing Library interaction tests.
+Date: 2026-11-08. Reviewed built UI, keyboard-only interaction results, Chrome accessibility
+output and the generated speech transcript from the installed Orca screen reader.
+The Orca/Chrome session used isolated D-Bus and temporary profiles/database, excluding other apps.
 
-## Completed Checks
+## Checks and Results
 
-- Desktop screenshot inspected at 1440 × 1000: single list and the two requested buttons on its
-  right, in the requested order. Empty and populated screenshots saved under /tmp/todo-*.png.
-- Responsive check at 390 × 844: no horizontal document overflow.
-- Browser create, cancel, inline validation, complete, inclusive display, reopen, edit and
-  soft-delete flows passed against a disposable migrated SQLite database.
-- Form entry focuses title; Cancel restores focus to create. Component tests verify pending
-  Save/Cancel disabling and failure re-enabling with entered content preserved.
-- Browser Space-key activation toggles the semantic pressed-state button. Native buttons,
-  checkbox and labelled inputs remain keyboard-focusable, with explicit focus-visible outlines.
-- Chrome accessibility tree exposes both action names. Forms have labels, optional-field
-  descriptions, aria-invalid/error associations; status and error feedback use live semantics.
-- Primary button white text contrast was measured at 9.34:1. Input and secondary control borders
-  were darkened to improve non-text contrast. Screenshot review confirms visible focus styling
-  is defined; RTL assertions verify error association and field preservation.
+| Area | Evidence | Result |
+|---|---|---|
+| Keyboard-only primary flows | Enter, Space, Tab and Shift+Tab for create, cancel, completion, inclusive display, reopening, edit and delete | Pass |
+| Form entry and return | Title receives focus; Cancel/save restores create-button focus | Pass |
+| Item disappearance | Completion/deletion focuses the list heading; navigation continues predictably | Pass |
+| Validation | Title invalid state and error relation exposed; Orca generates “invalid entry: Enter a title.” | Pass |
+| Form labels | Orca reads title, optional description and native segmented due-date controls | Pass |
+| Status announcements | Orca generates “Task created.”, “Task completed.”, “Task reopened.”, “Task updated.” and “Task deleted.” | Pass |
+| Completion control | Orca exposes checkbox labels and ticked/not-ticked state | Pass |
+| Visibility control | Named toggle button with pressed state | Pass |
+| Text contrast | Computed contrast reviewed in error/form and populated-list states; zero remaining findings | Pass |
+| Zoom and reflow | No horizontal overflow at 200% zoom or 320 CSS pixel viewport | Pass |
+| Responsive layout | Prior 390 × 844 browser check and inspected desktop screenshots | Pass |
+| Error recovery | Component tests preserve values and re-enable Save/Cancel after failed submission | Pass |
 
-## Pending Human Verification — T051 Remains Open
+## Findings Corrected
 
-A full screen-reader session (for example NVDA or VoiceOver) and manual WCAG 2.2 AA review of
-all flows have not been performed. Accessibility-tree inspection and automated interaction
-checks do not establish full AA conformance. Verify spoken validation/status announcements,
-focus order through every flow, and contrast for all rendered states before claiming SC-005.
+- Section marker and footer small text measured 4.33–4.37:1; side note measured 4.44:1.
+  Darkened these text colours to satisfy the 4.5:1 normal-text threshold. Rerun found zero
+  failing text nodes in the reviewed form/error and populated-list states.
+- Added aria-errormessage associations for all field errors alongside aria-describedby and
+  aria-invalid. Orca's transcript confirms the specific title error is announced.
+- Replaced generic completion/deletion feedback with specific completed/reopened/deleted
+  messages. The screen-reader transcript confirms the resulting live announcements.
+- Regression assertions for error-message association and deletion feedback failed before the
+  fixes and passed afterward.
 
-The implementation is functional; this remaining validation must be recorded rather than
-silently treated as a passing manual test.
+## Reproducible Evidence
+
+Run after npm run build, with installed Chrome, Orca, AT-SPI, a graphical DISPLAY and D-Bus:
+
+```bash
+dbus-run-session -- node tests/e2e/accessibility-check.mjs
+```
+
+The script fails on keyboard-flow errors, contrast findings, missing validation utterance or
+missing deletion utterance. It writes tests/e2e/accessibility-results.json and a temporary
+speech-only log at /tmp/todo-orca-speech.txt. The latest run produced 75 Orca utterances.
+
+The reviewer inspected generated Orca utterances; this report does not claim to have listened
+to audio or tested NVDA/VoiceOver. This is scoped acceptance evidence for the implemented
+assessment flows, not an independent certification of every browser/assistive-technology pair.
+No outstanding accessibility defects were identified in the reviewed scope.

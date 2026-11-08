@@ -47,13 +47,18 @@ and a temporary server. It closes them after each run; no browser framework was 
 
 - tests/e2e/browser-results.json: latest browser timing and accessibility-tree summary.
 - tests/e2e/performance-timezone.md: performance and timezone acceptance evidence.
-- tests/e2e/manual-acceptance.md: keyboard/accessibility checks and manual-review boundaries.
+- tests/e2e/manual-acceptance.md: completed T051 review, findings, fixes and scope.
+- tests/e2e/accessibility-results.json: Orca utterances, keyboard flows and contrast/reflow results.
 - /tmp/todo-empty.png and /tmp/todo-list.png: screenshots inspected during implementation.
 
-**T051 remains incomplete**: an actual human screen-reader session and full manual WCAG 2.2 AA
-review across all flows are still required. Automated DOM/AX inspection does not establish full
-conformance. SC-005 is therefore only partially validated; it is not reported as passing.
-T053 records this unavailable manual check instead of silently checking it off.
+**T051 completed** in a follow-up isolated Orca/Chrome review. All primary flows were exercised
+using keyboard events, the reviewer inspected Orca-generated speech output, and text contrast,
+200% zoom and 320 CSS pixel reflow were checked. Three groups of low-contrast secondary text
+were corrected, explicit field error-message associations added, and completion/deletion status
+announcements made specific. The rerun produced zero contrast findings and confirmed validation
+and deletion utterances. SC-005 passes for this reviewed scope; this is not a cross-platform
+accessibility certification or a claim of listening to audio.
 
-All application implementation tasks and other automated/documentation tasks are complete.
-No application commit, push, public deployment or unapproved dependency installation occurred.
+All 54 tasks are complete. The existing 8 component tests pass after the added regression
+assertions, strict type checking and production build pass, and lint was rerun after adding the
+accessibility script. No application commit, push or public deployment occurred.

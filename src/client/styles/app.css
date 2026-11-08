@@ -80,7 +80,7 @@ h1 em {
   font-weight:400;
   color:#668164}
 .section-number {
-  color:#6c756c;
+  color:#566650;
   padding-bottom:7px}
 .notice {
   min-height:26px;
@@ -136,7 +136,7 @@ h2 {
   background:#e3eadb}
 .aside-note {
   font:italic 19px/1.5 Georgia;
-  color:#64765d;
+  color:#566650;
   border-top:1px solid var(--line);
   margin:14px 0 0;
   padding:24px 8px}
@@ -260,7 +260,7 @@ footer {
   display:flex;
   justify-content:space-between;
   font-size:11px;
-  color:#69756c;
+  color:#566650;
   padding:25px 0}
 .task-controls {
   display:flex;

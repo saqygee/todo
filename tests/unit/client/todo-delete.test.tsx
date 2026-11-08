@@ -12,5 +12,6 @@ it('deletes and reloads the list with a clear empty state', async () => {
     fireEvent.click(screen.getByRole('button', { name: 'Delete: A task' }));
     await waitFor(() => expect(todoApi.remove).toHaveBeenCalledWith(task.id));
     await screen.findByText('Your list is clear.');
+    await screen.findByText('Task deleted.');
     expect(screen.getByRole('button', { name: 'create new task' })).toBeDefined();
 });

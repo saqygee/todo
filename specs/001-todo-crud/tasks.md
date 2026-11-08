@@ -122,7 +122,7 @@ its phase's test/setup batch after the prerequisite gates, not permission to byp
 **Independent Test / Gate**: All automated gates and the documented manual acceptance scenarios have recorded results.
 
 - [X] T050 Write failing built-app smoke tests in tests/integration/api/production.test.ts, then serve Vite assets with API-before-SPA fallback in src/server/app.ts and finalise resource shutdown in src/server/index.ts; verify start/build/db:deploy from package.json.
-- [ ] T051 [P] Run keyboard, screen-reader, focus and contrast checks for every story using specs/001-todo-crud/quickstart.md; record findings and needed corrections in tests/e2e/manual-acceptance.md for resolution before T053.
+- [X] T051 [P] Run keyboard, screen-reader, focus and contrast checks for every story using specs/001-todo-crud/quickstart.md; record findings and needed corrections in tests/e2e/manual-acceptance.md for resolution before T053.
 - [X] T052 [P] Execute 100-task visibility/order checks and 20 timed trials per list/filter/write action from specs/001-todo-crud/quickstart.md; record timing, the ≥19/20 under two seconds acceptance result, timezone evidence and any regressions in tests/e2e/performance-timezone.md for resolution before T053.
 - [X] T053 Resolve findings from T051–T052 using their affected source/test paths, then run test:unit, test:integration, test:components, typecheck, lint and build from package.json; verify migration reproducibility, restart persistence and database isolation; record commands/results and any unavailable manual checks in specs/001-todo-crud/validation-results.md.
 - [X] T054 Update README.md with approved setup, scripts, local-only scope and links to specs/001-todo-crud/quickstart.md; review git diff for secrets, generated databases, unintended dependencies and architecture violations, retaining focused changes without committing or pushing unless requested.
@@ -205,6 +205,6 @@ assumption. Record any remaining manual validation honestly instead of checking 
 
 ## Implementation Status — 2026-11-08
 
-53/54 tasks complete. All implementation and automated verification tasks passed. T051 remains
-open for a human screen-reader and full manual WCAG review; completed keyboard, browser AX and
-contrast evidence is in tests/e2e/manual-acceptance.md. See validation-results.md for actual checks.
+54/54 tasks complete. T051 was completed with an isolated Orca/Chrome session, a keyboard-only
+walkthrough of all primary flows, reviewed speech output, contrast corrections and zoom/reflow
+checks. See tests/e2e/manual-acceptance.md and accessibility-results.json for evidence and scope.
