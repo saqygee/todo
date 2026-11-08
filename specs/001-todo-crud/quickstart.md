@@ -7,7 +7,7 @@ Do not treat these commands as already executed or as permission to install pack
 ## Prerequisites
 
 - Node 24 LTS and npm; supported local desktop browser.
-- Approved exact dependency set and constitution stack reconciliation for Axios.
+- Approved exact dependency set; constitution v1.1.0 already includes Axios.
 - Development DATABASE_URL points to an ignored local SQLite file. Test database URLs MUST be
   distinct and isolated per worker. Use an .env.example with placeholders only.
 - The implementation supplies the scripts below and committed Prisma migrations. npm ci requires
@@ -78,7 +78,8 @@ ID for subsequent PATCH/detail/delete checks; do not reset an existing database 
 
 1. Open an empty list: both right-side buttons are visible in the requested order. Click
    "create new task": the list disappears and the form appears. Cancel restores the list without
-   saving. Repeat and create with only title; description and dueAt are null. Success restores
+   saving. During create/edit submission verify Save and Cancel are disabled; on failure both
+   re-enable with input retained, and on success the list returns. Repeat and create with only title; description and dueAt are null. Success restores
    the list, showing the new item. Failed validation/submission retains the form and input.
 2. Create three tasks, some with optional fields. Check ordinal order, reload/restart persistence,
    and "No description" / "No due date" when absent.

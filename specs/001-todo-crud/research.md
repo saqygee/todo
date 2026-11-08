@@ -94,11 +94,19 @@ installation, present exact versions, purpose, existing-capability gap and alter
 
 Select only necessary support packages after review. Prefer Node's built-in env-file loading
 and watch functionality over adding dotenv/concurrently/tsx where compiled/watch workflows suffice.
-Axios is an explicitly authorised stack addition; reconcile the constitution's stack list through
-the constitution workflow before installation. No permission is inferred for arbitrary packages.
+Axios is included in constitution v1.1.0 following the explicit user-approved amendment.
+Dependency review and installation approval are still required. No permission is inferred for arbitrary packages.
 
 ## Research Completion
 
 All functional questions are resolved, including lifetime ordinal allocation. Exact package patch
 selection and adapter error-code verification are implementation compatibility checks, not open
 product decisions. No external integrations, identity system or deployment platform are needed.
+
+## Submission Cancellation Policy
+
+**Decision**: Disable Save and Cancel while create/edit submission is pending. Re-enable both
+after failure with input retained; return to the list after success.
+**Rationale**: Request cancellation cannot guarantee the server did not commit a write.
+**Alternatives considered**: Allowing Cancel during submission would promise an unreliable undo;
+adding mutation rollback or idempotency infrastructure is unnecessary for this assessment.

@@ -60,6 +60,8 @@ visible in their original order. A seeded list can independently verify list fil
    **Then** an error appears below each invalid control and the form remains visible.
 9. **Given** the list, **When** "create new task" is clicked, **Then** the list is hidden and the
    creation form appears; successful creation or Cancel returns to the list. Cancel saves nothing.
+10. **Given** a create or edit request is pending, **When** the form is inspected, **Then** Save
+    and Cancel are disabled. Failure retains input and re-enables both; success returns to the list.
 
 ---
 
@@ -133,6 +135,7 @@ item and verify its ordinal is 3. Repeat after deleting the highest ordinal and 
   conflict warning. A stale edit MUST NOT restore a deleted item or overwrite completion status.
 - Invalid or nonexistent identifiers and already-deleted items MUST produce a clear unavailable
   result without creating, restoring or changing records. Repeated deletion leaves the record deleted.
+- Cancelling a pending HTTP request MUST NOT be interpreted as undoing a committed write.
 - Failed reads MUST show an error distinct from an empty list, with a retry action.
 - Failed writes MUST preserve saved data, report failure without false success, and allow retry;
   failed create/edit actions MUST preserve entered content.
@@ -146,20 +149,22 @@ item and verify its ordinal is 3. Repeat after deleting the highest ordinal and 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
+
 - **FR-001**: The system MUST provide one persistent ToDo list for a single user without login,
   registration, accounts, ownership assignment or multiple-user functionality.
 - **FR-002**: The user MUST be able to create a ToDo with a required title and optional description
   and due date/time. New items MUST be incomplete. The "create new task" button MUST hide the
   list and display the form. Successful creation or Cancel MUST return to the list; failure MUST
-  retain the form and entered values. Cancel MUST NOT save a record.
+  retain the form and entered values. Cancel before submission MUST NOT save a record. Save
+  and Cancel MUST be disabled while creating or editing is pending; failure MUST re-enable both
+  with input retained and success MUST restore the list.
 - **FR-003**: Titles MUST be trimmed and contain 1–120 characters. Optional descriptions MUST be
   trimmed and contain at most 500 characters; blank descriptions normalise to absent. Provided
   due dates MUST be valid timezone-qualified ISO 8601 values normalised to UTC. Absent optional
   fields MUST NOT cause validation errors. Optional fields MUST be clearable during editing.
 - **FR-004**: The interface MUST show a single list with two right-side buttons, in order:
-  "create new task" and "Display completed". The list MUST initially show only incomplete tasks.
-  "Display completed" MUST show completed and incomplete tasks together; a second click MUST
-  restore incomplete-only visibility. The button MUST expose its pressed state accessibly.
+  "create new task" and "Display completed". The second button MUST toggle completion visibility
+  and expose its pressed state accessibly; FR-018 defines which items are visible.
 - **FR-005**: The single list MUST display matching items in ascending ordinal order.
 - **FR-006**: The system MUST assign ordinals automatically, starting at 0 and using the maximum
   assigned ordinal across all retained records plus one. Deleted records MUST participate in this
@@ -197,7 +202,8 @@ item and verify its ordinal is 3. Repeat after deleting the highest ordinal and 
   warning. Content edits MUST preserve current completion status and MUST NOT restore deleted
   records.
 - **FR-018**: The default list MUST exclude completed records. includeCompleted=true MUST return
-  both statuses and the frontend MUST display both together. The selected visibility filter MUST
+  both statuses and the frontend MUST display both together. Toggling back MUST restore
+  incomplete-only visibility. The selected visibility filter MUST
   survive create/edit save or cancel; a full reload MUST start incomplete-only.
 - **FR-019**: Completion changes MUST accept an explicit Boolean state. Client requests MUST NOT
   set ID, ordinal, timestamps or deleted status. Each validation error MUST appear immediately

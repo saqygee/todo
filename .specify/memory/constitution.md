@@ -1,17 +1,15 @@
 <!--
 Sync Impact Report
-Version change: unversioned template → 1.0.0 (initial adoption)
-Modified principles: five unnamed template slots replaced with twelve supplied principles:
-I. Architecture and Design; II. Code Quality; III. Technology Constraints;
-IV. Database Principles; V. API Design; VI. Frontend Engineering;
-VII. Accessibility; VIII. Testing and TDD; IX. Security;
-X. Dependency Management; XI. AI-Assisted Development and Workflow;
-XII. Scope and Engineering Priorities.
-Added sections: Technology and Scope Constraints; Development Workflow and Quality Gates;
-concrete Governance rules.
-Removed sections: unused placeholder text and illustrative template comments.
-Dependent templates and commands: unchanged; read the constitution at runtime.
-Deferred items / follow-up TODOs: none.
+Version change: 1.0.0 → 1.1.0 (minor: approved technology boundary expanded)
+Modified principles: none; all twelve principles remain unchanged.
+Modified sections: Technology and Scope Constraints — add Axios to the frontend stack.
+Added sections: none.
+Removed sections: none.
+Approval: user explicitly approved the proposed Axios amendment on 2026-11-08.
+Rationale: use the requested HTTP client consistently for frontend API requests.
+Migration impact: documentation-only; no installed dependencies or application schema to migrate.
+Dependent artifacts: plan.md, research.md, quickstart.md and tasks.md reconciled in this remediation.
+Deferred items: dependency review and installation approval remain required under Principle X.
 -->
 # Todo Constitution
 
@@ -120,7 +118,7 @@ made or conflicting work proceeds.
 ## Technology and Scope Constraints
 
 - Backend: Node.js, Express 5, TypeScript, Prisma ORM, SQLite and Zod.
-- Frontend: React, TypeScript, Vite, React Hook Form and Zod.
+- Frontend: React, TypeScript, Vite, React Hook Form, Zod and Axios.
 - Testing: Vitest, Supertest and React Testing Library.
 - Product: a simple Todo application for creating, managing, organising and tracking everyday
   tasks. Authentication and multi-user functionality are excluded.
@@ -156,4 +154,4 @@ principles or governance; MINOR for new principles, sections or materially expan
 PATCH for clarifications and wording changes that do not alter obligations. Version 1.0.0 is the
 initial adoption of the supplied principles.
 
-**Version**: 1.0.0 | **Ratified**: 2026-11-08 | **Last Amended**: 2026-11-08
+**Version**: 1.1.0 | **Ratified**: 2026-11-08 | **Last Amended**: 2026-11-08

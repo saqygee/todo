@@ -44,7 +44,7 @@ CQRS, event bus, DI framework, microservices or unrelated feature work.
 |---|---|---|
 | I. Architecture | One modular monolith; feature modules within required layers | Pass |
 | II. Code quality | Strict types, Zod-inferred DTOs, explicit error narrowing, no any | Pass |
-| III. Technology | Approved stack; Axios explicitly requested by user | Pass with documented exception below |
+| III. Technology | Approved stack including Axios under constitution v1.1.0 | Pass |
 | IV. Database | UUID, Migrate, safe queries, unique ordinal, atomic transactions, UTC | Pass |
 | V. API | REST contract, validation, final error middleware, safe errors | Pass |
 | VI. Frontend | Focused components/hooks, RHF + Zod, local state, explicit states | Pass |
@@ -55,11 +55,10 @@ CQRS, event bus, DI framework, microservices or unrelated feature work.
 | XI. Workflow | Spec reconciled explicitly; test/type/lint evidence before completion | Pass |
 | XII. Scope | No enterprise infrastructure or unrequested product features | Pass |
 
-**Post-design recheck**: The same gates pass for the data model, API contract and validation guide.
-Axios is an explicitly user-authorised technology exception to the current stack list. Update the
-constitution's stack entry through the constitution workflow before implementation installs it;
-this planning command does not rewrite governance. Installation approval remains a separate gate.
-No unjustified architecture violations or unresolved functional clarifications remain.
+**Post-design recheck**: Architecture and design gates pass against constitution v1.1.0,
+which includes the explicitly approved Axios addition. Dependency review and installation
+approval remain mandatory execution prerequisites under Principle X; stack approval alone
+is not installation approval. No outstanding stack amendment or architecture exception remains.
 
 ## Project Structure
 
@@ -181,7 +180,9 @@ or query caching. TodosPage holds local view state (list/create/edit) and includ
 In list view, TodoListActions sits to the right of the list with "create new task" first and
 "Display completed" second. The first button hides the list and its action group and displays
 TodoForm with Save and Cancel. Successful creation returns to the list, refreshes it and retains
-the completion filter. Cancel returns without saving and discards the draft. Validation or
+the completion filter. Before submission, Cancel returns without saving and discards the draft. Save and Cancel are
+disabled while a create or edit request is pending. On failure both re-enable with input retained;
+on success return to the list. Cancelling an HTTP request is not treated as undoing a save. Validation or
 request failure keeps the form visible and preserves entered values. Move focus to the title
 on form entry and back to "create new task" on return. An empty list still shows both buttons.
 Editing uses the same form view; save or cancel returns to the list.
@@ -230,7 +231,10 @@ sidecars, generated Prisma output and test artefacts to .gitignore during implem
 
 1. Dependency review, approved installation, strict build and isolated test harness. Record the
    expected failing baseline before each behavioural slice.
-2. Shared validation and repository migration tests: required title, optional-field omission/null/
+2. Test shared validation and middleware in isolation. Configure Prisma, then write schema
+   tests, create the shared schema/initial migration and generate the client before building the
+   isolated migrated-database harness. Write HTTP boundary tests, compose Express and make those
+   integration tests pass before the foundational checkpoint. Cover: required title, optional-field omission/null/
    clearing, lengths, provided due dates, flags, UUID, unique
    ordinal and rollback; apply committed migrations to each isolated test database.
 3. P1 list/create service and API tests, including concurrent creation and persistence.
@@ -251,9 +255,7 @@ end-to-end runner requires separate approval. Component tests alone cannot estab
 
 ## Complexity Tracking
 
-| Exception | Why needed | Alternative considered |
-|---|---|---|
-| Axios beyond the constitution's listed stack | Explicitly requested in this planning input | Built-in fetch would work but does not meet the request |
-
-No architecture exceptions. No implementation, dependency installation or tasks.md generation
-is performed by this command.
+No constitution or architecture exceptions remain. Axios is included in the approved stack in
+constitution v1.1.0. Dependency installation still requires the Principle X review and approval.
+This remediation changes documentation only; it does not implement the application or install
+packages.
