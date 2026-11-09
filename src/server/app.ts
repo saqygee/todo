@@ -1,4 +1,5 @@
 import express from 'express';
+import { docsRoutes } from './docs/docs.routes.js';
 import { resolve } from 'node:path';
 import type { TodoService } from './services/todo.service.js';
 import { todoRoutes } from './routes/todo.routes.js';
@@ -15,6 +16,7 @@ export function createApp(options: {
     app.use('/api', requireJson, express.json({ limit: '32kb' }));
     if (options.service)
         app.use('/api/todos', todoRoutes(options.service));
+    app.use('/api', docsRoutes());
     app.use('/api', notFoundHandler);
     if (options.clientDir) {
         const folder = resolve(options.clientDir);

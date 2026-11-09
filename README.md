@@ -12,9 +12,10 @@ bash scripts/install.sh
 npm start
 ```
 
-Open **http://127.0.0.1:3000**. The installer installs locked dependencies, creates missing `.env`,
-builds and applies migrations while preserving existing configuration and data. SQLite needs no
-separate server. Defaults: `DATABASE_URL=file:./prisma/dev.db`, `PORT=3000`.
+Open **http://127.0.0.1:3000**. The installer installs locked dependencies, including Swagger UI
+and OpenAPI types, creates missing `.env`, builds and applies migrations while preserving existing
+configuration and data. SQLite needs no separate server.
+Defaults: `DATABASE_URL=file:./prisma/dev.db`, `PORT=3000`.
 
 For development:
 
@@ -29,6 +30,38 @@ npm run dev:client
 ```
 
 Open **http://127.0.0.1:5173**. Use `db:deploy` to apply committed migrations.
+
+## API documentation
+
+Install and build once with `bash scripts/install.sh`, then start the backend with Swagger:
+
+```bash
+npm run swagger
+```
+
+If port 3000 is already occupied:
+
+```bash
+PORT=3001 npm run swagger
+# Open http://127.0.0.1:3001/api/docs/
+```
+
+Swagger runs in the existing backend process; `npm start` also serves it.
+With the backend running, open **http://127.0.0.1:3000/api/docs/** for Swagger UI or
+**http://127.0.0.1:3000/api/openapi.json** for the OpenAPI 3.0.3 description.
+The same paths are available through **http://127.0.0.1:5173** when both development servers
+are running; use your configured backend port when it differs from 3000.
+
+Documentation covers all six task operations, request and response schemas, validation, errors
+and unauthenticated access. Swagger UI is **browse-only**: request submission is disabled.
+Assets and the description are served locally and need no internet access after installation.
+If documentation cannot be prepared, restore backend availability and refresh the page.
+
+The description reuses existing Zod schemas and TypeScript types. Field descriptions explain
+rules that structural schemas cannot express, including trimming and write-time due-date checks.
+Swagger-specific automated tests, E2E tests, WCAG audits and Orca checks are excluded by user
+direction; existing application regression tests remain unchanged.
+See [documentation usage and scope](specs/003-swagger-openapi-docs/quickstart.md).
 
 ## Tests
 

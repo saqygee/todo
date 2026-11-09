@@ -8,7 +8,19 @@
 
 **Input**: User description: "Add Swagger/OpenAPI documentation to the existing backend. Document all existing endpoints, request parameters, bodies, response schemas, validation, errors and authentication requirements. Provide Swagger UI, reuse existing TypeScript types and Zod schemas wherever practical, follow the constitution and architecture, and avoid unnecessary application changes."
 
+## Clarifications
+
+### Session 2026-11-09
+
+- Q: How should Swagger UI assets be delivered? → A: Serve assets locally; documentation works without internet after installation.
+- Q: Should users be able to submit API requests from Swagger UI? → A: Browse only; disable request submission.
+- User direction: Swagger documentation has no WCAG or Orca acceptance requirement; existing Todo UI requirements are unchanged.
+- User direction: No Swagger-specific unit, integration, component or E2E tests; remove previously authored Swagger tests. Existing application regression tests remain unchanged.
+- Analysis remediation I1: Request schemas describe structural inputs; post-trim length checks and other normalization-dependent rules are authoritative in field descriptions, not misleading raw-input length constraints. Response schemas retain normalized-value constraints.
+
 ## User Scenarios & Testing *(mandatory)*
+
+The scenarios below describe intended behavior for documentation review, not instructions to create or run Swagger tests. The user-approved testing exception applies; no Swagger-specific automated or E2E checks are required.
 
 ### User Story 1 - Understand the existing API contract (Priority: P1)
 
@@ -16,7 +28,7 @@ As an API consumer, I can inspect a complete published contract so that I can co
 
 **Why this priority**: An accurate contract is the foundation of useful documentation.
 
-**Independent Test**: Retrieve the description and compare all six operations, inputs and outputs against existing behavior.
+**Independent Review**: Review the published-description construction against the six existing operations, inputs and outputs in source code.
 
 **Acceptance Scenarios**:
 
@@ -33,13 +45,15 @@ As a developer or reviewer, I can browse the published contract in Swagger UI to
 
 **Why this priority**: A browser interface is an explicit deliverable and supports API discovery.
 
-**Independent Test**: Open the documented UI address in development and built application modes and inspect each operation.
+**Independent Review**: Review local UI configuration, fixed description address and delivery routes for development and built application modes; no Swagger E2E tests.
 
 **Acceptance Scenarios**:
 
 1. **Given** either supported application mode, **When** a user opens the documented UI address, **Then** all six operations appear without document-loading errors.
-2. **Given** keyboard or screen-reader navigation, **When** a user browses operations and schemas, **Then** controls have accessible names, keyboard access, visible focus and readable content consistent with WCAG 2.2 AA.
-3. **Given** existing tasks, **When** a user opens or browses documentation without submitting a request, **Then** no task data changes.
+2. **Given** the documentation overview, **When** a user inspects an operation, **Then** its parameters, request body, response schemas and error guidance are available in the browser.
+3. **Given** existing tasks, **When** a user opens or browses documentation, **Then** request submission is unavailable and no task data changes.
+4. **Given** installed application dependencies and no internet access, **When** a user browses documentation, **Then** its interface assets and API description remain available locally.
+5. **Given** an unavailable or invalid API description, **When** documentation cannot be presented, **Then** a visible status identifies the failure and explains that the user can retry by refreshing after backend availability is restored; no task request or automatic mutation retry occurs, and refreshed documentation is available once the description is restored.
 
 ---
 
@@ -49,7 +63,7 @@ As a consumer or maintainer, I can understand validation failures and trust that
 
 **Why this priority**: Accurate failure guidance prevents incorrect clients and protects existing workflows.
 
-**Independent Test**: Compare representative valid and invalid requests against documented outcomes and run existing regression checks.
+**Independent Review**: Compare documented outcomes with current schemas, controllers, service rules and error handling; run only existing application regression checks.
 
 **Acceptance Scenarios**:
 
@@ -78,7 +92,7 @@ As a consumer or maintainer, I can understand validation failures and trust that
 - **FR-002**: The description MUST cover GET and POST `/api/todos`, GET/PATCH/DELETE `/api/todos/{id}`, and PATCH `/api/todos/{id}/completion`, with a distinct summary for each operation.
 - **FR-003**: Each operation MUST document applicable path and query parameters, types, requiredness, allowed values and defaults. `includeCompleted` accepts literal query values `true` and `false`, defaulting to exclusion of completed tasks.
 - **FR-004**: Create, content update and completion MUST have separate JSON request descriptions specifying permitted fields, requiredness, nullability, defaults, unknown-property rejection and the nonempty content-update constraint.
-- **FR-005**: Documentation MUST describe trimming, title length 1–120, description length at most 500, blank-description conversion to null, UUID identifiers, timezone-qualified due dates and UTC response serialization.
+- **FR-005**: Documentation MUST state that title length 1–120 and description length at most 500 apply after trimming, and describe blank-description conversion to null, UUID identifiers, timezone-qualified due dates and UTC response serialization. Request schemas MUST NOT apply these normalized-value length limits to raw strings. Field descriptions MUST state these semantic rules explicitly; response schemas MUST retain the normalized-value limits.
 - **FR-006**: Documentation MUST explain future-date write validation, retention of the exact stored overdue instant on update, clearing with null and preservation on omission. Response descriptions MUST permit historical dates.
 - **FR-007**: The complete Todo representation MUST include `id`, `title`, `description`, `dueAt`, `ordinal`, `completed`, `deleted`, `createdAt` and `updatedAt`, with types, nullability and system-managed fields. Returned `deleted` is always false; completion uses its separate operation.
 - **FR-008**: Every operation MUST describe actual success responses: list and single-item `data` envelopes, create's 201 status and `Location` header, and deletion's bodyless 204 response.
@@ -86,13 +100,13 @@ As a consumer or maintainer, I can understand validation failures and trust that
 - **FR-010**: A shared error description MUST represent `error.code`, `error.message` and optional `error.fields`, mapping field names to arrays of messages and permitting an empty map. Examples MUST match current messages and exclude internal errors, paths and stack traces.
 - **FR-011**: Applicable operations and shared boundary guidance MUST document 400 `VALIDATION_ERROR`, 404 `TODO_NOT_FOUND` and `ROUTE_NOT_FOUND`, create-only 409 `ORDINAL_EXHAUSTED`, 413 `PAYLOAD_TOO_LARGE`, 415 `UNSUPPORTED_MEDIA_TYPE`, 503 `STORAGE_BUSY` and 500 `INTERNAL_ERROR`. The 503 response MUST describe `Retry-After: 1` and the create/content-update retry scope.
 - **FR-012**: Documentation MUST explicitly state that authentication, authorisation roles and per-user isolation are absent. It MUST NOT introduce credentials or describe hypothetical 401/403 responses as existing behavior.
-- **FR-013**: Swagger UI MUST render the published description at a stable browser address in development and built application modes. Usage instructions MUST identify both documentation addresses and how to access them.
-- **FR-014**: Documentation browsing MUST be read-only unless a user explicitly submits an API request. Examples MUST NOT automatically seed or modify persistent task data.
-- **FR-015**: Documentation UI work MUST target WCAG 2.2 AA, including semantic structure, accessible labels, keyboard navigation, visible and predictable focus, contrast, screen-reader compatibility and accessible feedback for affected interactions.
-- **FR-016**: Existing TypeScript types and Zod validation schemas MUST be reused wherever practical to avoid competing definitions. Any unavoidable documentation-specific representation or manually described business rule MUST have a documented reason and consistency check against existing behavior.
+- **FR-013**: Swagger UI MUST present the published description using locally served assets in development and built application modes, including without internet access after installation. Usage instructions MUST identify the interface and description addresses and how to access them. Documentation MUST NOT depend on remote assets, external validation services or remote configuration.
+- **FR-014**: Swagger UI MUST be browse-only with request submission disabled for every operation. Documentation browsing and examples MUST NOT make task API requests, seed data or modify persistent task data.
+- **FR-015**: Swagger documentation acceptance MUST cover ordinary browser functionality only; WCAG conformance, accessibility audits, Orca and other screen-reader checks are excluded by the user-approved constitutional exception. Existing Todo UI accessibility requirements remain unchanged.
+- **FR-016**: Existing TypeScript types and Zod validation schemas MUST be reused wherever practical to avoid competing definitions. Any unavoidable documentation-specific representation or manually described business rule MUST have a documented reason and static consistency review against existing behavior.
 - **FR-017**: Implementation MUST preserve the constitution's modular monolith and controller/service/repository responsibilities. Existing application code changes MUST be limited to exposing documentation; existing API contracts, validation, error handling, business rules, persistence and frontend workflows MUST remain unchanged.
 - **FR-018**: Dependency and technology choices MUST follow constitutional review and approval requirements. Planning MUST explain each proposed external dependency's purpose, existing-capability limitations and alternatives before introduction or installation. This specification selects no package and does not amend the constitution.
-- **FR-019**: Verification MUST cover description validity, complete operation coverage, UI availability in both application modes, representative contract consistency, accessibility and regression behavior, following the constitution's test-first workflow and applicable quality gates.
+- **FR-019**: Verify documentation by static review of schema generation, complete operation coverage, delivery/configuration and contract fidelity, plus type checks, lint and build. Do not add or retain Swagger-specific unit, integration, component or E2E tests. Preserve and run existing application tests for regressions under the constitution's scoped exception.
 
 ### Key Entities
 
@@ -105,10 +119,10 @@ As a consumer or maintainer, I can understand validation failures and trust that
 ### Measurable Outcomes
 
 - **SC-001**: Consumers can find all six existing task operations in both published and browser documentation: 100% coverage and no invented task operations.
-- **SC-002**: Every operation has complete inputs, success responses, applicable errors and access requirements; representative valid and invalid requests have zero documented-versus-observed discrepancies.
-- **SC-003**: In development and built application modes, users can inspect all six operations without document-loading errors or unintended task changes.
-- **SC-004**: All existing regression checks relevant to task behavior continue to pass, with zero intentional changes to task contracts or stored-data behavior.
-- **SC-005**: Documentation browsing review finds zero unresolved WCAG 2.2 AA failures in affected keyboard, focus, naming, contrast and screen-reader flows.
+- **SC-002**: Every operation has complete inputs, success responses, applicable errors and access requirements; static comparison of representative valid and invalid request rules has zero discrepancies against the complete documented contract (structural schemas plus explicit semantic rules). Structural request schemas are not a replacement for runtime validation; static review MUST distinguish intentionally prose-only rules from structural constraints, including whitespace-only titles and valid titles with surrounding whitespace.
+- **SC-003**: In development and built application modes, users can inspect all six operations using local assets without internet access, document-loading errors, task API requests or task changes.
+- **SC-004**: The full existing automated test suite, type checks, lint, build and CRUD browser acceptance checks continue to pass, with zero intentional changes to task contracts or stored-data behavior. Commands and observed results MUST be recorded; unavailable prerequisites MUST be reported as blockers rather than passes. This documentation-only feature does not require an Orca run of the unchanged Todo interface.
+- **SC-005**: Static review covers all six operations, request and response descriptions, fixed local UI settings and visible failure/recovery feedback with zero unresolved source-level contract issues. Swagger-specific runtime, browser, WCAG and screen-reader testing is excluded; do not claim those checks passed.
 - **SC-006**: Using documentation alone, a reviewer can construct a valid create request and identify expected validation and missing-task responses without consulting source code.
 
 ## Assumptions
@@ -118,6 +132,6 @@ As a consumer or maintainer, I can understand validation failures and trust that
 - Documentation is available with the existing application; a separate hosted service is unnecessary.
 - Static frontend routes and implicit framework method handling are not additional task operations. Existing fallback and unmatched-method behavior remain unchanged outside new documentation addresses.
 - Authentication implementation, multi-user support, database changes, new task operations, client generation, public hosting and business-rule changes are outside scope.
-- Interactive request execution is not an additional acceptance requirement; if exposed by Swagger UI, it uses existing operations and requires explicit user action.
-- Existing schemas, types, tests and contract artifacts provide documentation inputs. Dynamic rules and transformations require descriptions even when not expressible as schema constraints.
-- Constitution version 1.1.0 governs this work. Any required technology-boundary amendment must be resolved explicitly during planning before conflicting implementation proceeds.
+- Interactive request execution is excluded from this feature; all task operations remain documented with request submission disabled.
+- Existing schemas, types, tests and contract artifacts provide documentation inputs. Structural schemas intentionally do not encode post-trim length validation, blank-to-null normalization or clock-dependent checks; these rules are specified explicitly in descriptions and statically reviewed against runtime source behavior. This is not permission to change runtime validation.
+- Constitution version 1.4.0 governs this work. Any required technology-boundary amendment must be resolved explicitly during planning before conflicting implementation proceeds.

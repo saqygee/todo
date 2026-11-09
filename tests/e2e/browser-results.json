@@ -12,20 +12,20 @@
     "list": {
       "trials": 20,
       "under2seconds": 20,
-      "maxMs": 84,
-      "medianMs": 64
+      "maxMs": 88,
+      "medianMs": 74
     },
     "filter": {
       "trials": 20,
       "under2seconds": 20,
-      "maxMs": 93,
-      "medianMs": 66
+      "maxMs": 95,
+      "medianMs": 79
     },
     "write": {
       "trials": 20,
       "under2seconds": 20,
-      "maxMs": 149,
-      "medianMs": 129
+      "maxMs": 168,
+      "medianMs": 143
     }
   },
   "mobileOverflow": false,

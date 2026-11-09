@@ -1,15 +1,13 @@
 <!--
 Sync Impact Report
-Version change: 1.0.0 → 1.1.0 (minor: approved technology boundary expanded)
-Modified principles: none; all twelve principles remain unchanged.
-Modified sections: Technology and Scope Constraints — add Axios to the frontend stack.
-Added sections: none.
-Removed sections: none.
-Approval: user explicitly approved the proposed Axios amendment on 2026-11-08.
-Rationale: use the requested HTTP client consistently for frontend API requests.
-Migration impact: documentation-only; no installed dependencies or application schema to migrate.
-Dependent artifacts: plan.md, research.md, quickstart.md and tasks.md reconciled in this remediation.
-Deferred items: dependency review and installation approval remain required under Principle X.
+Version change: 1.3.0 → 1.4.0 (minor: user-approved Swagger testing exception)
+Approval: user explicitly requested no Swagger unit/E2E tests, all Swagger tests skipped,
+and removal of tests already written on 2026-11-09.
+Modified principle: VIII — Swagger-specific automated tests/TDD are excluded; existing application regression checks remain.
+Removed optional documentation test validator from the technology boundary and installed dependencies.
+Preserved: modular monolith, request validation, existing application tests, Swagger WCAG/Orca exemption.
+Dependent artifacts: feature 003 specification, plan, tasks, checklists and dependency review reconciled.
+No task behavior or database migration changes.
 -->
 # Todo Constitution
 
@@ -71,6 +69,12 @@ focus management, accessible labels and validation feedback, sufficient colour c
 screen-reader compatibility, and accessible interactive controls. Reviews MUST assess these
 requirements for every affected user flow.
 
+**Approved exception — Swagger/OpenAPI documentation UI**: This documentation interface is
+excluded from the WCAG 2.2 AA requirements and accessibility conformance review in this principle.
+Orca and other screen-reader checks are not required for Swagger documentation. Its acceptance
+covers documentation functionality and ordinary browser behavior. This exception does not relax
+accessibility requirements for the existing Todo interface or other product UI.
+
 ### VIII. Testing and TDD
 
 Functionality MUST follow test-driven development: write and observe a failing test, implement
@@ -80,6 +84,12 @@ integration tests. Tests MUST use Vitest, Supertest for HTTP integration, and Re
 Library for component behaviour as applicable. Coverage MUST include normal operation,
 validation failures, boundaries, edge cases and expected failures. Tests MUST remain
 deterministic, isolated and maintainable.
+
+**Approved exception — Swagger/OpenAPI documentation**: Do not add or retain Swagger-specific
+unit, integration, component or E2E tests, and do not require TDD for this documentation feature.
+Existing application tests remain in place and may be run for regression verification. Use static
+review, type checks, lint and build for documentation validation; do not claim unperformed
+Swagger runtime/browser checks as passing. This exception does not apply to other features.
 
 ### IX. Security
 
@@ -120,6 +130,9 @@ made or conflicting work proceeds.
 - Backend: Node.js, Express 5, TypeScript, Prisma ORM, SQLite and Zod.
 - Frontend: React, TypeScript, Vite, React Hook Form, Zod and Axios.
 - Testing: Vitest, Supertest and React Testing Library.
+- API documentation: OpenAPI 3.0.3 and locally served Swagger UI using swagger-ui-dist.
+  Documentation typing may use openapi-types; Swagger-specific test validation is excluded.
+  Reuse existing Zod schemas and TypeScript types; preserve existing backend layers and behavior.
 - Product: a simple Todo application for creating, managing, organising and tracking everyday
   tasks. Authentication and multi-user functionality are excluded.
 
@@ -154,4 +167,4 @@ principles or governance; MINOR for new principles, sections or materially expan
 PATCH for clarifications and wording changes that do not alter obligations. Version 1.0.0 is the
 initial adoption of the supplied principles.
 
-**Version**: 1.1.0 | **Ratified**: 2026-11-08 | **Last Amended**: 2026-11-08
+**Version**: 1.4.0 | **Ratified**: 2026-11-08 | **Last Amended**: 2026-11-09

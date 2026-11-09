@@ -4,7 +4,7 @@ set -euo pipefail
 
 if [[ $# -gt 0 ]]; then
   if [[ $# -eq 1 && ( "$1" == '--help' || "$1" == '-h' ) ]]; then
-    printf 'Usage: bash scripts/install.sh\nRequires Node.js 24 and npm. Preserves existing .env and database data.\n'
+    printf 'Usage: bash scripts/install.sh\nRequires Node.js 24 and npm. Installs application and Swagger dependencies. Preserves existing .env and database data.\n'
     exit 0
   fi
   printf 'Usage: bash scripts/install.sh\n' >&2
@@ -21,8 +21,11 @@ if [[ "$(node -p 'process.versions.node.split(".")[0]')" != '24' ]]; then
   exit 1
 fi
 
-printf 'Installing locked dependencies (including build tools)...\n'
-npm ci --include=dev
+printf 'Installing locked dependencies (including Swagger UI, OpenAPI types and build tools)...\n'
+# Keep required native dependency installation hooks, but opt out of Swagger's
+# transitive Scarf installation reporting.
+SCARF_ANALYTICS=false npm ci --include=dev
+npm ls --depth=0 swagger-ui-dist openapi-types
 
 if [[ ! -e .env && ! -L .env ]]; then
   # Noclobber also protects a file created while installation was running.
@@ -39,3 +42,4 @@ npm run db:deploy
 
 printf '\nInstallation complete. Run npm start from %s.\n' "$project_dir"
 printf 'Default address: http://127.0.0.1:3000 (or the PORT configured in your environment).\n'
+printf 'Swagger: npm run swagger, then open /api/docs/ on the same backend address.\n'
