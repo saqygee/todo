@@ -49,3 +49,18 @@ it('preserves a complete unsaved instant when the browser timezone identity chan
  await waitFor(()=>expect(save).toHaveBeenCalledWith({title:'Timezone',description:null,dueAt:expected}));
  }finally{spy.mockRestore();}
 });
+it('validates content and the controlled due group together through the form resolver',async()=>{
+ const save=vi.fn();render(<TodoForm onSave={save} onCancel={vi.fn()}/>);
+ fireEvent.change(screen.getByLabelText(/^Due date/),{target:{value:'2099-11-09'}});
+ fireEvent.click(screen.getByRole('button',{name:'Save task'}));
+ await screen.findByText('Enter a title.');
+ expect(await screen.findByText('Choose an hour.')).toBeTruthy();
+ expect(screen.getByText('Choose a minute.')).toBeTruthy();
+ expect(save).not.toHaveBeenCalled();
+ expect(document.activeElement).toBe(screen.getByLabelText('Title'));
+ fireEvent.change(screen.getByLabelText('Title'),{target:{value:'Complete group'}});
+ fireEvent.click(screen.getByRole('button',{name:'Clear due date'}));
+ fireEvent.click(screen.getByRole('button',{name:'Save task'}));
+ await waitFor(()=>expect(save).toHaveBeenCalledWith({title:'Complete group',description:null,dueAt:null}));
+ expect(screen.queryByText('Choose an hour.')).toBeNull();
+});

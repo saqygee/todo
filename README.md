@@ -1,102 +1,116 @@
-# Everyday — single-user ToDo application
+# Everyday — ToDo application
 
-A small React + Express application for creating, editing, completing and soft-deleting tasks.
-The list hides completed tasks by default. **Display completed** includes them alongside unfinished
-work; **create new task** replaces the list with a form until Save or Cancel returns you to it.
-Tasks appear newest first by immutable ordinal. Both actions sit above the list at the top right;
-the active completed filter uses a green background, checkmark and accessible pressed state.
-Only the title is required. Description and due date are optional, with errors below each control.
-Choose an optional due date with the native calendar and Hour/Minute selectors. Elapsed choices
-are unavailable. New or changed dates must still be in the future when saved; unchanged overdue
-dates can be kept during edits, or explicitly changed/cleared. Dates display in your local timezone.
+A local, single-user React + Express application for creating, editing, completing and soft-deleting
+tasks. Tasks appear newest first; **Display completed** includes completed tasks.
 
-## Run locally
+## Install and run
 
-Requires Node.js 24 and npm. Dependency installation was approved for this project; the reviewed
-exact versions are in [dependency-review.md](specs/001-todo-crud/dependency-review.md).
+Requires **Node.js 24.x** (verified with 24.4.1), npm and Bash. From the repository root:
 
 ```bash
-npm ci
-cp .env.example .env
-npm run db:generate
-npm run db:migrate
-npm run dev:server
-```
-
-In a second terminal:
-
-```bash
-npm run dev:client
-```
-
-Open **http://127.0.0.1:5173**. Vite proxies `/api` to the server at `127.0.0.1:3000`.
-The server development command watches and recompiles TypeScript and restarts the server.
-The ignored `.env` defaults to `DATABASE_URL=file:./prisma/dev.db` and `PORT=3000`.
-SQLite paths resolve from the repository root for both the application and migration commands.
-
-To run the production build locally:
-
-```bash
-npm run build
-npm run db:deploy
+bash scripts/install.sh
 npm start
 ```
 
-Open **http://127.0.0.1:3000**. Express serves the built UI and API from the same origin.
-`db:deploy` applies committed migrations; `db:migrate` is for local schema development.
-No database files, secrets or generated Prisma client code belong in Git.
+Open **http://127.0.0.1:3000**. The installer installs locked dependencies, creates missing `.env`,
+builds and applies migrations while preserving existing configuration and data. SQLite needs no
+separate server. Defaults: `DATABASE_URL=file:./prisma/dev.db`, `PORT=3000`.
 
-## Verification
+For development:
 
 ```bash
-npm run test:unit
-npm run test:integration
-npm run test:components
+npm ci
+[ -e .env ] || cp .env.example .env
+npm run db:generate
+npm run db:migrate
+npm run dev:server
+# Second terminal:
+npm run dev:client
+```
+
+Open **http://127.0.0.1:5173**. Use `db:deploy` to apply committed migrations.
+
+## Tests
+
+After setup:
+
+```bash
+npm test                 # Unit, integration/API endpoint and React component tests
 npm run typecheck
 npm run lint
 npm run build
+node tests/e2e/browser-check.mjs  # E2E; requires /usr/bin/google-chrome
 ```
 
-Integration tests apply migrations to isolated temporary SQLite files, refuse developer database
-paths and clean up only their own files. Supertest needs local loopback access. The migration
-reproducibility test runs Prisma Migrate in a fresh temporary directory and reconnects afterward.
+Vitest, Supertest and React Testing Library cover validation, business rules, CRUD endpoints,
+database transactions and UI recovery. Integration tests use temporary databases and require
+loopback access. Suites can run individually with `test:unit`, `test:integration`, `test:components`.
+Accessibility acceptance uses `dbus-run-session -- node tests/e2e/accessibility-check.mjs` after
+building; it requires Chrome, Orca, AT-SPI, D-Bus, xdotool and a graphical DISPLAY.
 
-An optional real-browser acceptance script uses an existing `/usr/bin/google-chrome` installation
-and Node's native Chrome DevTools Protocol support, with no additional testing dependency:
+## Design and behaviour
 
-```bash
-npm run build
-node tests/e2e/browser-check.mjs
-```
+**Backend:** modular monolith with **N-tier layered architecture**:
+routes → controllers → services → repositories → Prisma/SQLite. Separating HTTP, business rules
+and persistence improves testing and keeps deployment simple. Tradeoffs: extra delegation and
+one deployment/scaling unit. SQLite simplifies setup but limits concurrent writes; WAL and bounded
+asynchronous retries handle contention.
 
-It uses a disposable database and local server, verifies CRUD, validation, focus, keyboard button
-activation, accessible names and responsive layout, and times 20 trials per action with 100 tasks.
-Evidence and the completed Orca accessibility review are in
-[validation-results.md](specs/002-refine-task-list/validation-results.md).
+**React frontend architecture:** component composition, hooks and unidirectional data flow.
+`AppLayout` provides the shell; `TodosPage` coordinates views; list, item and form components
+receive props and callbacks. `useTodos` loads data, API services handle HTTP, and utilities handle
+dates. React Hook Form owns form state; Zod validates it. Local state avoids a global store,
+with more callback wiring as interactions grow.
 
-## Design choices
+**SOLID, DRY, KISS and YAGNI** guide focused responsibilities, shared helpers and minimal abstractions.
+**WCAG 2.2 AA** is a strict project requirement: semantic controls, labels, keyboard access,
+visible/restored focus, associated errors, live announcements, contrast, non-colour cues and reflow.
+Recorded accessibility checks cover Chrome/Orca; they do not certify complete conformance.
 
-- Modular monolith with route/controller/service/repository separation and shared Zod schemas.
-- Prisma + SQLite with version-controlled migrations, UUID identifiers and nullable optional fields.
-- Immutable lifetime ordinals start at 0, include deleted records when finding the maximum, and
-  never renumber or reuse deleted positions. Concurrent allocation uses a transaction, unique
-  constraint, WAL mode and bounded asynchronous retries.
-- Explicit Boolean completion updates; Boolean soft deletion excludes records from normal access.
-- ISO 8601 timezone-qualified date input, UTC storage/responses and browser-local presentation.
-  No calendar dependency: native date input and disabled hour/minute options, refreshed each minute
-  and on focus. Complete unsaved selections retain their exact UTC instant across timezone changes;
-  partial entries stay local with review guidance. DST gaps are rejected; repeated times use the
-  earlier occurrence. Service-owned date validation runs inside each create/update transaction,
-  rechecking the clock and current row on bounded retries.
-- React Hook Form + Zod and Axios; no global state framework or dependency injection container.
-- No authentication, multiple users, reordering, restoration or public deployment configuration.
-  This application is intended for the local single-user assessment.
+- Title is required (120 characters maximum); description is optional (500 maximum).
+- Due dates are optional; partial selections are rejected. New/changed dates must be future
+  instants; unchanged overdue dates may be retained or cleared. Server transactions revalidate writes.
+- UTC storage and local display preserve instant precision. DST gaps are rejected; repeated
+  local times use the earlier occurrence. Native controls disable elapsed options.
+- UUIDs identify tasks; immutable, never-reused ordinals determine order. Deleted rows remain stored.
 
-See the [updated API contract](specs/002-refine-task-list/contracts/rest-api.md),
-[implementation plan](specs/002-refine-task-list/plan.md),
-[task progress](specs/002-refine-task-list/tasks.md), and
-[acceptance guide](specs/002-refine-task-list/quickstart.md).
+Details: [API contract](specs/002-refine-task-list/contracts/rest-api.md),
+[plan](specs/002-refine-task-list/plan.md).
 
-For the screen-reader/keyboard/contrast review, with Orca, AT-SPI, D-Bus, xdotool and a graphical DISPLAY
-already available, run `dbus-run-session -- node tests/e2e/accessibility-check.mjs` after building.
-See [accessibility evidence](tests/e2e/manual-acceptance.md) for reviewed scope and findings.
+## AI workflow
+
+**Codex + Spec Kit** follow specification-first development (**Spec as Code**):
+**Specification → Plan → Tasks → Implementation → Review**, including changes and bug fixes.
+The user directed scope, architecture and dependencies through versioned artifacts and the
+[constitution](.specify/memory/constitution.md). Tasks have defined outcomes and dependency order;
+each is verified before completion.
+
+**TDD** (failing test → implementation → refactor), diff review, specification checks and automated
+gates constrain AI hallucinations; requirements and tests still need review. Corrections included
+SQLite contention, fresh-database setup, form ownership, time refresh, focus and contrast.
+Tradeoffs are high token usage, planning overhead and artifact maintenance.
+
+## Verification and remaining work
+
+| Snapshot/check | Recorded result |
+|---|---|
+| Initial implementation, 8 Nov 2026 | 37 tests; typecheck, lint, build and migration checks passed |
+| Refinement, 8 Nov 2026 | 57 tests; typecheck, lint and build passed |
+| Chrome E2E | CRUD, validation, timezone and responsive checks passed; 20/20 trials per action under 2 seconds with 100 tasks |
+| Chrome/Orca | 13 steps passed; 108 generated utterances reviewed; zero text contrast findings |
+| Review, 9 Nov 2026 | 21 component tests, typecheck and installer syntax/help passed; no review findings |
+
+Earlier results apply to their recorded snapshots. **Pending for current uncommitted changes:**
+rerun the full suite, lint, build, browser/accessibility checks and complete installer execution.
+[T036](specs/002-refine-task-list/tasks.md) guidance/tests are present but final acceptance and
+record reconciliation remain. Other browser/screen-reader combinations were not tested.
+Evidence: [initial](specs/001-todo-crud/validation-results.md),
+[refinement](specs/002-refine-task-list/validation-results.md),
+[accessibility](tests/e2e/manual-acceptance.md).
+
+**Estimated effort:** 1 hour planning, 2–3 hours implementation/TDD, 1–2 hours verification and
+documentation: **4–6 hours total**, an estimate rather than a measured log.
+
+**Limitations:** no authentication, multi-user isolation, public deployment setup, pagination,
+reordering or deleted-task restoration. Production expansion needs a specification for identity,
+hosting/TLS, backups, retention and concurrency, followed by implementation and broader testing.
