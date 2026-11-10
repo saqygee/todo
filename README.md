@@ -94,6 +94,8 @@ Details: [API contract](specs/002-refine-task-list/contracts/rest-api.md),
 
 ## AI workflow
 
+**Please refer to /specs folder to check for feature specification, planning and implementation**
+
 **Codex + Spec Kit** follow specification-first development (**Spec as Code**):
 **Specification → Plan → Tasks → Implementation → Review**, including changes and bug fixes.
 The user directed scope, architecture and dependencies through versioned artifacts and the
