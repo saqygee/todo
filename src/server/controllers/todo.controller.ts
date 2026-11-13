@@ -1,43 +1,37 @@
 import type { RequestHandler } from "express";
 import type { TodoService } from "../services/todo.service.js";
-import {
-  createTodoSchema,
-  listQuerySchema,
-  idSchema,
-  completionSchema,
-  updateTodoSchema,
-} from "../../shared/schemas/todo.schema.js";
+import { todoValidator } from "../validators/todo.validator.js";
 export function createTodoController(service: TodoService) {
   const list: RequestHandler = async (req, res) => {
-    const query = listQuerySchema.parse(req.query);
+    const query = todoValidator.list(req.query);
     res.json({ data: await service.list(query.includeCompleted) });
   };
   const get: RequestHandler = async (req, res) => {
-    res.json({ data: await service.get(idSchema.parse(req.params.id)) });
+    res.json({ data: await service.get(todoValidator.id(req.params)) });
   };
   const create: RequestHandler = async (req, res) => {
-    const item = await service.create(createTodoSchema.parse(req.body));
+    const item = await service.create(todoValidator.create(req.body));
     res
       .location("/api/todos/" + item.id)
       .status(201)
       .json({ data: item });
   };
   const complete: RequestHandler = async (req, res) => {
-    const { completed } = completionSchema.parse(req.body);
+    const { completed } = todoValidator.completion(req.body);
     res.json({
-      data: await service.complete(idSchema.parse(req.params.id), completed),
+      data: await service.complete(todoValidator.id(req.params), completed),
     });
   };
   const update: RequestHandler = async (req, res) => {
     res.json({
       data: await service.update(
-        idSchema.parse(req.params.id),
-        updateTodoSchema.parse(req.body),
+        todoValidator.id(req.params),
+        todoValidator.update(req.body),
       ),
     });
   };
   const remove: RequestHandler = async (req, res) => {
-    await service.remove(idSchema.parse(req.params.id));
+    await service.remove(todoValidator.id(req.params));
     res.status(204).end();
   };
   return { list, get, create, complete, update, remove };
