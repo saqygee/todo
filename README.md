@@ -116,13 +116,17 @@ Tradeoffs are high token usage, planning overhead and artifact maintenance.
 | Chrome E2E | CRUD, validation, timezone and responsive checks passed; 20/20 trials per action under 2 seconds with 100 tasks |
 | Chrome/Orca | 13 steps passed; 108 generated utterances reviewed; zero text contrast findings |
 | Review, 9 Nov 2026 | 21 component tests, typecheck and installer syntax/help passed; no review findings |
+| Swagger implementation, 9 Nov 2026 | 62 tests, typecheck, lint, build and existing Chrome E2E passed; dedicated Swagger tests and accessibility checks were excluded |
+| Submission review, 13 Nov 2026 | 62 tests across 34 files, typecheck, lint and production build passed |
 
-Earlier results apply to their recorded snapshots. **Pending for current uncommitted changes:**
-rerun the full suite, lint, build, browser/accessibility checks and complete installer execution.
-[T036](specs/002-refine-task-list/tasks.md) guidance/tests are present but final acceptance and
-record reconciliation remain. Other browser/screen-reader combinations were not tested.
+Earlier results apply to their recorded snapshots. The submission review did not rerun browser,
+accessibility or full installer checks. Full installer execution remains unverified.
+[T036](specs/002-refine-task-list/tasks.md) remains unchecked in the task record; guidance/tests
+are present, but final acceptance and record reconciliation remain outstanding.
+Other browser/screen-reader combinations were not tested.
 Evidence: [initial](specs/001-todo-crud/validation-results.md),
 [refinement](specs/002-refine-task-list/validation-results.md),
+[Swagger](specs/003-swagger-openapi-docs/validation-results.md),
 [accessibility](tests/e2e/manual-acceptance.md).
 
 **Estimated effort:** 1 hour planning, 2–3 hours implementation/TDD, 1–2 hours verification and
